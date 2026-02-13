@@ -12,7 +12,7 @@ SPREADSHEET_ID = '1EKopkgD6Qqehk-WRzoMCKpT-3e7bErJShr0nZwYEw38'  # TODO: @PF FIL
 TRANSACTION_RANGE_NAME = 'TransactionResponses!A:C'  # TODO: @PF FILL
 WAGER_RANGE_NAME = 'WagerResponses!A:I'  # TODO: @PF FILL
 
-_BASE_DIR = Path(__file__).parent.parent.parent  # To derby_bet/
+_BASE_DIR = next(p for p in Path(__file__).resolve().parents if p.name == 'derby_bet')
 
 
 def get_sheet_service():
