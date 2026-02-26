@@ -1,2 +1,6 @@
 src/log/*
 *.pyc
+.auth/*
+.auth/*
+derby_bet.egg-info
+drb/*
