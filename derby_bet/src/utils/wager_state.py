@@ -1,84 +1,100 @@
 # Imports
-from googleapiclient.discovery import build
+from pathlib import Path
 import threading
 from time import sleep
 from datetime import datetime
 import json
-from utils import google_api as gapi
-from utils.io_tools import find_project_root
+import pandas as pd
+from googleapiclient.discovery import build
+
+from derby_bet.src.utils import google_api as gapi
+from derby_bet.src.utils.io_tools import find_project_root
 
 
 _BASE_DIR = find_project_root()
-_DRB_DIR = Path(_BASE_DIR, 'src', 'drb')
+_DRB_DIR = Path(_BASE_DIR, 'drb')
 
 class WagerState:
 
     def __init__(self):
-        self.all_wagers = []
-        self.last_processed_row = 1
+        self.all_wagers_unprocessed = []
+        self.all_wagers_processed = []
+        self.last_processed_row = 0
         self.lock = threading.Lock()
     
-    def update(self, new_wagers, total_rows):
+    def update(self, new_unp_wagers, new_proc_wagers, total_rows):
         with self.lock:
-            self.all_wagers.extend(new_wagers)
+            self.all_wagers_unprocessed.extend(new_unp_wagers)
+            self.all_wagers_processed.extend(new_proc_wagers)
             self.last_processed_row = total_rows
     
-    def get_all(self):
+    def get_all(self, processed=False):
         with self.lock:
-            return self.all_wagers.copy()
+            if processed:
+                return self.all_wagers_processed.copy()
+            else:
+                return self.all_wagers_unprocessed.copy()
     
 
-def process_wager(wager_data):
-    print(f'Processing wager: {wager_data}')
+_STATE_ = WagerState()
 
-    # Processing logic calls here
-
-    with open(str(Path(_DRB_FP, 'wagers', 'wager_log_unprocessed.json')), 'a') as file:
+def save_latest_wager(wager_dir, wager_data, processed=False):
+    if not Path(wager_dir).exists():
+        Path(wager_dir).mkdir(parents=True)
+    proc = 'processed' if processed else 'unprocessed'
+    with open(str(Path(wager_dir, f'wager_timeline_{proc}.json')), 'a') as file:
         file.write(json.dumps({
             'timestamp': datetime.now().isoformat(),
             'wager': wager_data
         }) + '\n')
 
+
+def process_wager(wager_data):
+    print(f'Processing wager: {wager_data}')
+    wager_dir = Path(_DRB_DIR, 'wagers')
+    save_latest_wager(wager_dir, wager_data, processed=False)
+    
+    # Processing logic calls here
+
+    save_latest_wager(wager_dir, wager_data, processed=True)
+
     return wager_data
 
 
-def poll_google_sheets(update_time=5):
-    service = get_sheet_service()
+def output_state(state_data, processed=False):
+    wager_dir = Path(_DRB_DIR, 'wagers')
+    if not Path(wager_dir).exists():
+        Path(wager_dir).mkdir(parents=True)
+    df = pd.DataFrame(state_data)
+    proc = 'processed' if processed else 'unprocessed'
+    df.to_csv(str(Path(wager_dir, f'wager_state_{proc}.csv')), index=False)
 
+
+def poll_wagers(update_time=5):
     while True:
         try:
-            result = service.spreadsheets().values().get(
-                spreadsheetId=SPREADSHEET_ID,
-                range=RANGE_NAME
-            ).execute()
+            all_responses = gapi.get_form_responses(gapi.WAGER_RANGE_NAME)
+            new_responses = all_responses[_STATE_.last_processed_row:]
+            new_processed = process_wager(new_responses)
+            _STATE_.update(new_responses, new_processed, len(all_responses))
+            if (len(new_responses) > 0):
+                output_state(_STATE_.get_all(processed=False), processed=False)
+                output_state(_STATE_.get_all(processed=True), processed=True)
 
-            values = result.get('values', [])
-
-            if not values:
-                continue
-            
-            headers = values[0]
-            all_rows = values[1:]
-
-            new_rows = all_rows[state.last_processed_row:]
-
-            if new_rows:
-                print(f'Found {len(new_rows)} new wagers')
-
-                new_wagers = []
-                for row in new_rows:
-                    row_dict = {}
-                    for i, header in enumerate(headers):
-                        row_dict[header] = row[i] if i < len(row) else ''
-                    
-                    processed = process_wager(row_dict)
-                    new_wagers.append(processed)
-
-                state.update(new_wagers, len(all_rows))
-                print(f'Processed {len(new_wagers)} new wagers. Total: {len(state.get_all())}')
+            print(f'Processed {len(new_processed)} new wagers. Total received: {len(all_responses)}')
 
         except Exception as e:
-            print(f'Error polling sheets: {e}')
+            print(f'Error polling sheets for wagers: {e}')
         
         sleep(update_time)
 
+
+def start_background_polling():
+    polling_thread = threading.Thread(target=poll_wagers, daemon=True)
+    polling_thread.start()
+    print('Background polling started')
+
+
+if __name__ == '__main__':
+    start_background_polling()
+    sleep(120)

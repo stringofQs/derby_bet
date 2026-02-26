@@ -10,6 +10,5 @@ def find_project_root(marker_file='pyproject.toml'):
             if marker_file.lower() in str(fp.name).lower():
                 return Path(fp).parent
         srch_dir = Path(srch_dir).parent
-    
     return None
             
