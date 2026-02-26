@@ -3,3 +3,4 @@ src/log/*
 .auth/*
 .auth/*
 derby_bet.egg-info
+drb/*
