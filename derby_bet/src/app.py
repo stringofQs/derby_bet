@@ -5,7 +5,7 @@ import threading
 from flask import Flask, render_template, jsonify, request
 import webbrowser
 
-from utils import log_utils as lu
+from derby_bet.utils import log_utils as lu
 
 # Inputs --------------------------
 LOG_LEVEL = logging.DEBUG

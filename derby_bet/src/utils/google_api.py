@@ -6,13 +6,14 @@ from googleapiclient.discovery import build
 from pathlib import Path
 import json
 import pickle
+from derby_bet.src.utils.io_tools import find_project_root
 
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 SPREADSHEET_ID = '1EKopkgD6Qqehk-WRzoMCKpT-3e7bErJShr0nZwYEw38'  # TODO: @PF FILL
 TRANSACTION_RANGE_NAME = 'TransactionResponses!A:C'  # TODO: @PF FILL
 WAGER_RANGE_NAME = 'WagerResponses!A:I'  # TODO: @PF FILL
 
-_BASE_DIR = next(p for p in Path(__file__).resolve().parents if p.name == 'derby_bet')
+_BASE_DIR = find_project_root()
 
 
 def get_sheet_service():
