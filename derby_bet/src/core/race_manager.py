@@ -78,17 +78,17 @@ class RaceManager:
         ind_race = self.get_race_info(race_num)
         return str(ind_race.get('status')).lower() == 'next'
 
-    def set_results(self, race_num, win, place, post):
+    def set_results(self, race_num, win, place, show):
         ind_race = self.get_race_info(race_num)
         
         ind_race['win'] = win
         ind_race['place'] = place
-        ind_race['post'] = post
+        ind_race['show'] = show
         ind_race['status'] = 'complete'
         with self.lock:
             self.races[str(int(race_num))] = ind_race
 
-        if str(int(race_num) + 1) in self.race.keys():
+        if str(int(race_num) + 1) in self.races.keys():
             next_race = self.get_race_info(int(race_num)+1)
             next_race['status'] = 'next'
             with self.lock:
@@ -118,8 +118,8 @@ class RaceManager:
             if str(r_dict['status']).lower() == 'closed':
                 continue
 
-            post_time = datetime.fromisoformat(r_dict['post_time'])
-            minutes_until = (post_time - now).total_seconds() / 60.
+            post_time = dt.datetime.fromisoformat(r_dict['post_time'])
+            minutes_until = (post_time - now_ts).total_seconds() / 60.
 
             if (0 <= minutes_until <= minutes_ahead):
                 upcoming.append(r_dict)
@@ -138,7 +138,7 @@ class RaceManager:
         ind_race['status'] = 'closed'
 
         with self.lock:
-            self.races[race_num] = ind_race
+            self.races[str(int(race_num))] = ind_race
         self._save_races()
 
     def add_race(self, race_id, race_desc, post_time):
@@ -159,3 +159,13 @@ class RaceManager:
         self._save_races()
 
 _RACE_MANAGER = RaceManager()
+print(_RACE_MANAGER.is_race_pending(1))
+print(_RACE_MANAGER.is_race_next(1))
+print(_RACE_MANAGER.is_race_complete(1))
+print(_RACE_MANAGER.is_race_pending(2))
+print(_RACE_MANAGER.get_race_info(12))
+print(_RACE_MANAGER.get_upcoming_races(129000))
+print(_RACE_MANAGER.set_results(1, 8, 19, 4))
+print(_RACE_MANAGER.get_race_info(1))
+print(_RACE_MANAGER.is_race_complete(1))
+print(_RACE_MANAGER.is_race_next(2))
