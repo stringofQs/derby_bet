@@ -154,34 +154,48 @@ class PlayerManager:
         self._timestamp_player_change(ind_player.get('player_id'))
         self._save_players()
 
-    def set_bids_purchased(self, bids, player_name=None, player_id=None):
+    def _set_bids_custom(self, bid_amount, bid_category, player_name=None, player_id=None):
+        if bid_category.lower() == 'purchased':
+            self.set_bids_purchased(bid_amount, player_name=player_name, player_id=player_id)
+        elif bid_category.lower() == 'available':
+            self.set_bids_available(bid_amount, player_name=player_name, player_id=player_id)
+        elif bid_category.lower() == 'won':
+            self.set_bids_won(bid_amount, player_name=player_name, player_id=player_id)
+        elif bid_category.lower() == 'active_pending':
+            self.set_bids_pending(bid_amount, player_name=player_name, player_id=player_id)
+        elif bid_category.lower() == 'lost':
+            self.set_bids_lost(bid_amount, player_name=player_name, player_id=player_id)
+        else:
+            raise ValueError('Invalid bid category: {}'.format(bid_category))
+
+    def set_bids_purchased(self, bid_amount, player_name=None, player_id=None):
         bid_data = self.get_bids_data(player_name=player_name, player_id=player_id)
-        bid_data['purchased'] = bids
+        bid_data['purchased'] = bid_amount
         self.set_bid_data(bid_data.copy(), player_name=player_name, player_id=player_id)
 
-    def set_bids_available(self, bids, player_name=None, player_id=None):
+    def set_bids_available(self, bid_amount, player_name=None, player_id=None):
         bid_data = self.get_bids_data(player_name=player_name, player_id=player_id)
-        bid_data['available'] = bids
+        bid_data['available'] = bid_amount
         self.set_bid_data(bid_data.copy(), player_name=player_name, player_id=player_id)
     
-    def set_bids_won(self, bids, player_name=None, player_id=None):
+    def set_bids_won(self, bid_amount, player_name=None, player_id=None):
         bid_data = self.get_bids_data(player_name=player_name, player_id=player_id)
-        bid_data['won'] = bids
+        bid_data['won'] = bid_amount
         self.set_bid_data(bid_data.copy(), player_name=player_name, player_id=player_id)
 
-    def set_bids_pending(self, bids, player_name=None, player_id=None):
+    def set_bids_pending(self, bid_amount, player_name=None, player_id=None):
         bid_data = self.get_bids_data(player_name=player_name, player_id=player_id)
-        bid_data['active_pending'] = bids
+        bid_data['active_pending'] = bid_amount
         self.set_bid_data(bid_data.copy(), player_name=player_name, player_id=player_id)
 
-    def set_bids_lost(self, bids, player_name=None, player_id=None):
+    def set_bids_lost(self, bid_amount, player_name=None, player_id=None):
         bid_data = self.get_bids_data(player_name=player_name, player_id=player_id)
-        bid_data['lost'] = bids
+        bid_data['lost'] = bid_amount
         self.set_bid_data(bid_data.copy(), player_name=player_name, player_id=player_id)
 
-    def has_bids_available(self, bids, player_name=None, player_id=None):
+    def has_bids_available(self, bid_amount, player_name=None, player_id=None):
         bids_avail = self.get_bids_available(player_name=player_name, player_id=player_id)
-        return int(bids_avail) >= int(bids)
+        return int(bids_avail) >= int(bid_amount)
     
     def apply_bid_exchange(self, bids, from_bid, to_bid, player_name=None, player_id=None):
         assert isinstance(from_bid, str), 'Expected a string to indicate where the bid exchange is coming from. Received {}'.format(from_bid)
@@ -189,15 +203,53 @@ class PlayerManager:
 
         # Determine the from_bid
         if any([i in from_bid.lower() for i in ['avail', 'available']]):  # From bid is "available"
-            pass
-        elif ..
-            pass
+            from_bid = 'available'
+        elif any([i in from_bid.lower() for i in ['pend', 'pending', 'active']]):  # From bid is "active_pending"
+            from_bid = 'active_pending'
+        elif any([i in from_bid.lower() for i in ['won', 'win']]):  # From bid is "won"
+            from_bid = 'won'
+        elif any([i in from_bid.lower() for i in ['lost', 'lose', 'losing']]):  # From bid is "lost"
+            from_bid = 'lost'
+        elif any([i in from_bid.lower() for i in ['purchase', 'bought', 'purch', 'buy']]):  # From bid is "purchased"
+            from_bid = 'purchased'
+        else:
+            raise LookupError('Invalid "from_bid" received in exchange: {}'.format(from_bid))
         
         # Determine the to_bid
         if any([i in to_bid.lower() for i in ['avail', 'available']]):  # To bid is "available"
-            pass
-        elif ..
-            pass
+            to_bid = 'available'
+        elif any([i in to_bid.lower() for i in ['pend', 'pending', 'active']]):  # To bid is "active_pending"
+            to_bid = 'active_pending'
+        elif any([i in to_bid.lower() for i in ['won', 'win']]):  # To bid is "won"
+            to_bid = 'won'
+        elif any([i in to_bid.lower() for i in ['lost', 'lose', 'losing']]):  # To bid is "lost"
+            to_bid = 'lost'
+        elif any([i in to_bid.lower() for i in ['purchase', 'bought', 'purch', 'buy']]):  # To bid is "purchased"
+            to_bid = 'purchased'
+        else:
+            raise LookupError('Invalid "to_bid" received in exchange: {}'.format(to_bid))
+        
+        bid_data = self.get_bids_data(player_name=player_name, player_id=player_id)
+        if (from_bid != to_bid):
+            from_total = bid_data.get(from_bid, 0)
+            to_total = bid_data.get(to_bid, 0)
+            if (from_total >= bids):
+                self._set_bids_custom(from_total - bids, from_bid, player_name=player_name, player_id=player_id)
+                self._set_bids_custom(to_total + bids, to_bid, player_name=player_name, player_id=player_id)
+            
+    def set_winning_bid(self, amount_won, associated_pending, player_name=None, player_id=None):
+        # When a bid is won, the total amount of bids won will be applied to both the "won" and "available" categories
+        # Additionally, the amount in the associated pending will be removed (this amount is all bid amount on this current race)
+        current_won = self.get_bids_won(player_name=player_name, player_id=player_id)
+        current_avail = self.get_bids_available(player_name=player_name, player_id=player_id)
+        current_pending = self.get_bids_pending(player_name=player_name, player_id=player_id)
+
+        self.set_bids_won(current_won + amount_won, player_name=player_name, player_id=player_id)
+        self.set_bids_available(current_avail + amount_won, player_name=player_name, player_id=player_id)
+        self.set_bids_pending(current_pending - associated_pending, player_name=player_name, player_id=player_id)
+    
+    def place_active_bid_amount(self, amount_bid, player_name=None, player_id=None):
+        self.apply_bid_exchange(amount_bid, 'available', 'active_pending', player_name=player_name, player_id=player_id)
 
 
 _PLAYER_MANAGER = PlayerManager()
