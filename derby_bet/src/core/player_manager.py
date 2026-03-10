@@ -61,7 +61,7 @@ class PlayerManager:
                 data = json.load(file)
         
         for k, v in data.items():
-            player_name = data.get('player_name')
+            player_name = v.get('player_name')
             self._map_name_id_dict[str(player_name)] = str(int(k))
             
         return data
@@ -108,9 +108,11 @@ class PlayerManager:
                     }
                 }
 
-            self._timestamp_player_change()
+            self._timestamp_player_change(int(new_id))
             self._map_name_id_dict[player_name] = str(int(new_id))
             self._update_player_count()
+
+            self._save_players()
     
     def get_player_info(self, player_name=None, player_id=None):
         player_id = self._get_player_id(player_name=player_name, player_id=player_id)
@@ -151,7 +153,7 @@ class PlayerManager:
 
         with self.lock:
             self.players[str(int(ind_plyr.get('player_id')))] = ind_plyr.copy()
-        self._timestamp_player_change(ind_player.get('player_id'))
+        self._timestamp_player_change(ind_plyr.get('player_id'))
         self._save_players()
 
     def _set_bids_custom(self, bid_amount, bid_category, player_name=None, player_id=None):
@@ -192,6 +194,11 @@ class PlayerManager:
         bid_data = self.get_bids_data(player_name=player_name, player_id=player_id)
         bid_data['lost'] = bid_amount
         self.set_bid_data(bid_data.copy(), player_name=player_name, player_id=player_id)
+
+    def change_bids_purchased(self, bid_change, player_name=None, player_id=None):
+        amt = self.get_bids_purchased(player_name=player_name, player_id=player_id)
+        self.set_bids_purchased(amt + bid_change, player_name=player_name, player_id=player_id)
+        # TODO: @PF MAKE AN ASSOCIATED METHOD FOR ALL BID TYPES, THEN UPDATE MORE COMPLEX METHODS BELOW WITH RELEVANT CHANGE METHODS
 
     def has_bids_available(self, bid_amount, player_name=None, player_id=None):
         bids_avail = self.get_bids_available(player_name=player_name, player_id=player_id)
