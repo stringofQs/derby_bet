@@ -4,3 +4,4 @@ src/log/*
 .auth/*
 derby_bet.egg-info
 drb/wagers/*
+drb/players/*
