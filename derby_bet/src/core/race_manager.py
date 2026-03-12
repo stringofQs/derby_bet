@@ -155,17 +155,8 @@ class RaceManager:
             'status': 'pending'
         }
 
-        self.races[str(int(race_id))] = new_race
+        with self.lock:
+            self.races[str(int(race_id))] = new_race
         self._save_races()
 
 _RACE_MANAGER = RaceManager()
-print(_RACE_MANAGER.is_race_pending(1))
-print(_RACE_MANAGER.is_race_next(1))
-print(_RACE_MANAGER.is_race_complete(1))
-print(_RACE_MANAGER.is_race_pending(2))
-print(_RACE_MANAGER.get_race_info(12))
-print(_RACE_MANAGER.get_upcoming_races(129000))
-print(_RACE_MANAGER.set_results(1, 8, 19, 4))
-print(_RACE_MANAGER.get_race_info(1))
-print(_RACE_MANAGER.is_race_complete(1))
-print(_RACE_MANAGER.is_race_next(2))
