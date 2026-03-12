@@ -78,6 +78,10 @@ class RaceManager:
         ind_race = self.get_race_info(race_num)
         return str(ind_race.get('status')).lower() == 'next'
 
+    def is_valid_race(self, race_num):
+        race_data = self.get_race_info(race_num)
+        return len(race_data.keys()) > 0
+
     def set_results(self, race_num, win, place, show):
         ind_race = self.get_race_info(race_num)
         
