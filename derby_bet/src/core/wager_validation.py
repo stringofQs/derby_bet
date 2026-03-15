@@ -107,35 +107,42 @@ def normalize_wager_values(wager_data):
     output = wager_data.copy()
     output['race_number'] = int(output.get('race_number', 0))
     output['player_id'] = int(output.get('player_id', 0))
-    output['win_post'] = int(output.get('win_post', 0))
-    output['win_bid'] = int(output.get('win_bid', 0))
-    output['place_post'] = int(output.get('place_post', 0))
-    output['place_bid'] = int(output.get('place_bid', 0))
-    output['show_post'] = int(output.get('show_post', 0))
-    output['show_bid'] = int(output.get('show_bid', 0))
     return output
 
 
-def apply_bids_to_pool(wager_data):
-    if wager_data.get('valid', False):
-        race_num = wager_data.get('race_number', 0)
-        win_bid = wager_data.get('win_bid', 0)
-        win_post = wager_data.get('win_post', 0)
-        place_bid = wager_data.get('place_bid', 0)
-        place_post = wager_data.get('place_post', 0)
-        show_bid = wager_data.get('show_bid', 0)
-        show_post = wager_data.get('show_post', 0)
-        _POOL_MANAGER.apply_to_win_pool(race_num, win_post, win_bid)
-        _POOL_MANAGER.apply_to_place_pool(race_num, place_post, place_bid)
-        _POOL_MANAGER.apply_to_show_pool(race_num, show_post, show_bid)
+def apply_bids_to_pool(in_data):
+    for wager_data in in_data:
+        print(wager_data)
+        if isinstance(wager_data, dict) and (wager_data.get('valid', False)):
+            race_num = wager_data.get('race_number', 0)
+            win_bid = wager_data.get('win_bid', 0)
+            win_post = wager_data.get('win_post', 0)
+            place_bid = wager_data.get('place_bid', 0)
+            place_post = wager_data.get('place_post', 0)
+            show_bid = wager_data.get('show_bid', 0)
+            show_post = wager_data.get('show_post', 0)
+            if len(str(win_post)) > 0:
+                _POOL_MANAGER.apply_to_win_pool(race_num, win_post, win_bid)
+            if len(str(place_post)) > 0:
+                _POOL_MANAGER.apply_to_place_pool(race_num, place_post, place_bid)
+            if len(str(show_post)) > 0:
+                _POOL_MANAGER.apply_to_show_pool(race_num, show_post, show_bid)
 
 
-def apply_bids_to_player_data(wager_data):
-    if wager_data.get('valid', False):
-        race_num = wager_data.get('race_number', 0)
-        win_bid = wager_data.get('win_bid', 0)
-        place_bid = wager_data.get('place_bid', 0)
-        show_bid = wager_data.get('show_bid', 0)
-        player_id = wager_data.get('player_id', 0)
-        total = int(win_bid) + int(place_bid) + int(show_bid)
-        _PLAYER_MANAGER.place_bids(total, player_id=int(player_id))
+def apply_bids_to_player_data(in_data):
+    for wager_data in in_data:
+        print(wager_data)
+        if isinstance(wager_data, dict) and (wager_data.get('valid', False)):
+            race_num = wager_data.get('race_number', 0)
+            win_bid = wager_data.get('win_bid', 0)
+            place_bid = wager_data.get('place_bid', 0)
+            show_bid = wager_data.get('show_bid', 0)
+            player_id = wager_data.get('player_id', 0)
+            total = 0
+            if len(str(win_bid)) > 0:
+                total += int(win_bid)
+            if len(str(place_bid)) > 0:
+                total += int(place_bid)
+            if len(str(show_bid)) > 0:
+                total += int(show_bid)
+            _PLAYER_MANAGER.place_bids(total, player_id=str(player_id))
