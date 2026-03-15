@@ -9,6 +9,7 @@ from googleapiclient.discovery import build
 
 from derby_bet.src.utils import google_api as gapi
 from derby_bet.src.utils.io_tools import find_project_root
+from derby_bet.src.core.wager_validation import validate_wager_data
 
 
 _BASE_DIR = find_project_root()
@@ -54,11 +55,12 @@ def process_wager(wager_data):
     wager_dir = Path(_DRB_DIR, 'wagers')
     save_latest_wager(wager_dir, wager_data, processed=False)
     
-    # Processing logic calls here
+    valid_wagers = validate_wager_data(wager_data)  # Wager validation
+    # TODO: @PF Pass valid wagers on to other processes that include moving player bids to pending and adding to relevant pools
 
-    save_latest_wager(wager_dir, wager_data, processed=True)
+    save_latest_wager(wager_dir, valid_wagers, processed=True)
 
-    return wager_data
+    return valid_wagers
 
 
 def output_state(state_data, processed=False):
@@ -97,4 +99,4 @@ def start_background_polling():
 
 if __name__ == '__main__':
     start_background_polling()
-    sleep(120)
+    sleep(1200)

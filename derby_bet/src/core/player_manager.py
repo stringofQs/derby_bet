@@ -90,6 +90,13 @@ class PlayerManager:
             player_id = self._map_name_id_dict.get(str(player_name))
         return player_id
 
+    def is_valid_player(self, player_name=None, player_id=None):
+        try:
+            _ = self.get_player_info(player_name=player_name, player_id=player_id)
+        except Exception as _:
+            return False
+        return True
+
     def add_new_player(self, player_name):
         if player_name in self._map_name_id_dict.keys():
             logging.warning('Provided player ({}) already exists. Not adding as a new player.'.format(player_name))
