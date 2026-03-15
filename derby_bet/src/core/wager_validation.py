@@ -9,6 +9,7 @@ import json
 from derby_bet.src.utils.io_tools import find_project_root
 from derby_bet.src.core.player_manager import _PLAYER_MANAGER
 from derby_bet.src.core.race_manager import _RACE_MANAGER
+from derby_bet.src.core.pool_manager import _POOL_MANAGER
 
 
 _BASE_DIR = find_project_root()
@@ -60,18 +61,18 @@ def validate_wager_data(wager_data):
         norm_wager_data['total_bid'] = total_bids
 
         if _PLAYER_MANAGER.has_bids_available(total_bids, player_name=player_name):
-            norm_wager_data['PlayerHasBids'] = True
+            norm_wager_data['player_has_bids'] = True
         else:
-            norm_wager_data['PlayerHasBids'] = False
+            norm_wager_data['player_has_bids'] = False
             errors.append('Player does not have {} bids available to fulfill wager.'.format(total_bids))
         
         if (len(errors) > 0):
-            norm_wager_data['Valid'] = False
+            norm_wager_data['valid'] = False
         else:
-            norm_wager_data['Valid'] = True
+            norm_wager_data['valid'] = True
         
         err_str = '; '.join(errors)
-        norm_wager_data['Errors'] = err_str
+        norm_wager_data['errors'] = err_str
 
         output_wagers.append(norm_wager_data)
 
@@ -113,3 +114,28 @@ def normalize_wager_values(wager_data):
     output['show_post'] = int(output.get('show_post', 0))
     output['show_bid'] = int(output.get('show_bid', 0))
     return output
+
+
+def apply_bids_to_pool(wager_data):
+    if wager_data.get('valid', False):
+        race_num = wager_data.get('race_number', 0)
+        win_bid = wager_data.get('win_bid', 0)
+        win_post = wager_data.get('win_post', 0)
+        place_bid = wager_data.get('place_bid', 0)
+        place_post = wager_data.get('place_post', 0)
+        show_bid = wager_data.get('show_bid', 0)
+        show_post = wager_data.get('show_post', 0)
+        _POOL_MANAGER.apply_to_win_pool(race_num, win_post, win_bid)
+        _POOL_MANAGER.apply_to_place_pool(race_num, place_post, place_bid)
+        _POOL_MANAGER.apply_to_show_pool(race_num, show_post, show_bid)
+
+
+def apply_bids_to_player_data(wager_data):
+    if wager_data.get('valid', False):
+        race_num = wager_data.get('race_number', 0)
+        win_bid = wager_data.get('win_bid', 0)
+        place_bid = wager_data.get('place_bid', 0)
+        show_bid = wager_data.get('show_bid', 0)
+        player_id = wager_data.get('player_id', 0)
+        total = int(win_bid) + int(place_bid) + int(show_bid)
+        _PLAYER_MANAGER.place_bids(total, player_id=int(player_id))
