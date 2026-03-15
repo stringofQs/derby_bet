@@ -66,6 +66,13 @@ class PoolManager:
             with open(str(self.pool_file), 'w') as file:
                 json.dump(self.pools, file, indent=2)
     
+    def _setup_new_race_pool(self, race_num):
+        pool_dict = {'win': {}, 'place': {}, 'show': {}}
+        if str(race_num) not in self.pools.keys():
+            with self.lock:
+                self.pools[str(race_num)] = pool_dict.copy()
+            self._save_pools()
+    
     def get_pool_info(self, race_num, spec_pool=None):
         if isinstance(race_num, int) or isinstance(race_num, float):
             race_num = str(int(race_num))
@@ -97,30 +104,33 @@ class PoolManager:
         return pool.get(post, 0)
 
     def set_win_pool(self, race_num, post, value):
+        self._setup_new_race_pool(race_num)
         pool = self.get_pool_info(race_num, 'win')
         if isinstance(post, int) or isinstance(post, float):
             post = str(int(post))
         pool[post] = value
         with self.lock:
-            self.pools[race_num]['win'] = pool
+            self.pools[str(race_num)]['win'] = pool
         self._save_pools()
 
     def set_place_pool(self, race_num, post, value):
+        self._setup_new_race_pool(race_num)
         pool = self.get_pool_info(race_num, 'place')
         if isinstance(post, int) or isinstance(post, float):
             post = str(int(post))
         pool[post] = value
         with self.lock:
-            self.pools[race_num]['place'] = pool
+            self.pools[str(race_num)]['place'] = pool
         self._save_pools()
 
     def set_show_pool(self, race_num, post, value):
+        self._setup_new_race_pool(race_num)
         pool = self.get_pool_info(race_num, 'show')
         if isinstance(post, int) or isinstance(post, float):
             post = str(int(post))
         pool[post] = value
         with self.lock:
-            self.pools[race_num]['show'] = pool
+            self.pools[str(race_num)]['show'] = pool
         self._save_pools()
 
     def apply_to_win_pool(self, race_num, post, amount):
