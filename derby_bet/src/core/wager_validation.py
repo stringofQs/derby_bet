@@ -38,19 +38,31 @@ def validate_wager_data(wager_data):
             errors.append('Invalid race number: {}'.format(race_number))
         
         win_post = norm_wager_data.get('win_post', -1)
-        win_bid = norm_wager_data.get('win_bid', -1)
+        win_bid = norm_wager_data.get('win_bid', 0)
         if ((len(str(win_post)) == 0) and (len(str(win_bid)) != 0)) or ((len(str(win_post)) != 0) and (len(str(win_bid)) == 0)):
             errors.append('Win post + bid received are incompatible: {} + {}'.format(win_post, win_bid))
 
         place_post = norm_wager_data.get('place_post', -1)
-        place_bid = norm_wager_data.get('place_bid', -1)
+        place_bid = norm_wager_data.get('place_bid', 0)
         if ((len(str(place_post)) == 0) and (len(str(place_bid)) != 0)) or ((len(str(place_post)) != 0) and (len(str(place_bid)) == 0)):
             errors.append('Place post + bid received are incompatible: {} + {}'.format(place_post, place_bid))
         
         show_post = norm_wager_data.get('show_post', -1)
-        show_bid = norm_wager_data.get('show_bid', -1)
+        show_bid = norm_wager_data.get('show_bid', 0)
         if ((len(str(show_post)) == 0) and (len(str(show_bid)) != 0)) or ((len(str(show_post)) != 0) and (len(str(show_bid)) == 0)):
             errors.append('Show post + bid received are incompatible: {} + {}'.format(show_post, show_bid))
+
+        win_bid = 0 if len(str(win_bid)) == 0 else int(str(win_bid))
+        place_bid = 0 if len(str(place_bid)) == 0 else int(str(place_bid))
+        show_bid = 0 if len(str(show_bid)) == 0 else int(str(show_bid))
+        total_bids = win_bid + place_bid + show_bid
+        norm_wager_data['total_bid'] = total_bids
+
+        if _PLAYER_MANAGER.has_bids_available(total_bids, player_name=player_name):
+            norm_wager_data['PlayerHasBids'] = True
+        else:
+            norm_wager_data['PlayerHasBids'] = False
+            errors.append('Player does not have {} bids available to fulfill wager.'.format(total_bids))
         
         if (len(errors) > 0):
             norm_wager_data['Valid'] = False
