@@ -1,7 +1,7 @@
 src/log/*
 *.pyc
 .auth/*
-.auth/*
 derby_bet.egg-info
 drb/wagers/*
 drb/players/*
+drb/pool/*
