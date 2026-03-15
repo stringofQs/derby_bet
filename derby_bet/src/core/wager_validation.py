@@ -23,7 +23,8 @@ def validate_wager_data(wager_data):
 
     for wager in wager_data:
         errors = []
-        norm_wager_data = normalize_wager_fields(wager)
+        out1 = normalize_wager_fields(wager)
+        norm_wager_data = normalize_wager_values(out1.copy())
 
         player_name = norm_wager_data.get('player_name', '').strip()
         if _PLAYER_MANAGER.is_valid_player(player_name=player_name):
@@ -69,6 +70,9 @@ def validate_wager_data(wager_data):
         else:
             norm_wager_data['Valid'] = True
         
+        err_str = '; '.join(errors)
+        norm_wager_data['Errors'] = err_str
+
         output_wagers.append(norm_wager_data)
 
     return output_wagers
@@ -95,4 +99,17 @@ def normalize_wager_fields(wager_data):
     output = {}
     for k, v in wager_data.items():
         output[field_map.get(k, k.lower().strip().replace(' ', '_'))] = v
+    return output
+
+
+def normalize_wager_values(wager_data):
+    output = wager_data.copy()
+    output['race_number'] = int(output.get('race_number', 0))
+    output['player_id'] = int(output.get('player_id', 0))
+    output['win_post'] = int(output.get('win_post', 0))
+    output['win_bid'] = int(output.get('win_bid', 0))
+    output['place_post'] = int(output.get('place_post', 0))
+    output['place_bid'] = int(output.get('place_bid', 0))
+    output['show_post'] = int(output.get('show_post', 0))
+    output['show_bid'] = int(output.get('show_bid', 0))
     return output

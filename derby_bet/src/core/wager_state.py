@@ -58,9 +58,9 @@ def process_wager(wager_data):
     valid_wagers = validate_wager_data(wager_data)  # Wager validation
     # TODO: @PF Pass valid wagers on to other processes that include moving player bids to pending and adding to relevant pools
 
-    save_latest_wager(wager_dir, wager_data, processed=True)
+    save_latest_wager(wager_dir, valid_wagers, processed=True)
 
-    return wager_data
+    return valid_wagers
 
 
 def output_state(state_data, processed=False):
@@ -99,4 +99,4 @@ def start_background_polling():
 
 if __name__ == '__main__':
     start_background_polling()
-    sleep(120)
+    sleep(1200)
