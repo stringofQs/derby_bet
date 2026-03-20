@@ -168,6 +168,3 @@ class PoolManager:
         for v in pool.values():
             total += int(round(float(v), 0))
         return total
-
-
-_POOL_MANAGER = PoolManager()            
