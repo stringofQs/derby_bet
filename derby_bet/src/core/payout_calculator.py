@@ -116,3 +116,42 @@ class PayoutCalculator:
     def summarize_post_payouts(self, post):
         payout_by_post = self._parse_out_data(post=post)
         return payout_by_post.copy()
+    
+    def get_payouts_between_ids(self, first_payout_id, last_payout_id):
+        selected_payouts = []
+        with self.lock:
+            for i in range(int(first_payout_id), int(last_payout_id)):
+                selected_payouts.append(self.payouts.get(str(int(i)), str(int(i))))
+        return selected_payouts
+
+    def calculate_payouts(self, race_num, bet_type, posts, pool_dict, wagers, total_pool):
+        transactions = []
+
+        if len(pool_dict.keys()) == 0:
+            print('No pool data for: Race={} | Bet={}'.format(race_num, bet_type))
+            return transactions
+
+        if total_pool == 0:
+            print('Pool total is 0 for Race={} | Bet={}'.format(race_num, bet_type))
+        
+        win_amount = sum([pool_dict.get(str(post), 0) for post in posts])
+
+        first_payout_id = self.next_transaction_id
+
+        for wager in wagers:
+            pid = wager.get('player_id', 0)
+            wager_post = wager.get('{}_post'.format(bet_type), 0)
+            wager_amount = float(wager.get('{}_bid'.format(bet_type), 0))
+            if str(int(wager_post)) not in posts:  # Specific wager is a losing post
+                self.add_new_payout(
+                    race_num, pid, bet_type, wager_post, wager_amount, 0
+                )
+            
+            else:  # Wager is for a winning post
+                share = (wager_amount / win_amount) * total_pool
+                self.add_new_payout(
+                    race_num, pid, bet_type, wager_post, wager_amount, share
+                )
+        return [int(first_payout_id), int(self.next_transaction_id)]
+    
+

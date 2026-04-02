@@ -46,6 +46,7 @@ class PlayerManager:
         self.lock = threading.Lock()
         self.players = self._load_players()
         self.total_players = None
+        self.all_player_ids = []
         self._update_player_count()
 
     def _get_player_file(self):
@@ -77,6 +78,7 @@ class PlayerManager:
     
     def _update_player_count(self):
         self.total_players = len(self.players.keys())
+        self.all_player_ids = sorted(list(self.players.keys()))
     
     def _timestamp_player_change(self, player_id):
         with self.lock:

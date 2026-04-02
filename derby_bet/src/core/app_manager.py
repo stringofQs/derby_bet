@@ -106,7 +106,11 @@ class AppManager:
 
         return output_wagers
 
-    def apply_bids_to_pool(self, in_data):
+    def place_valid_wagers(self, in_data):
+        self._apply_bids_to_pool(in_data)
+        self._apply_bids_to_player_data(in_data)
+
+    def _apply_bids_to_pool(self, in_data):
         for wager_data in in_data:
             if isinstance(wager_data, dict) and (wager_data.get('valid', False)):
                 race_num = wager_data.get('race_number', 0)
@@ -125,7 +129,7 @@ class AppManager:
                     if len(str(show_post)) > 0:
                         self.pool_manager.apply_to_show_pool(race_num, show_post, show_bid)
 
-    def apply_bids_to_player_data(self, in_data):
+    def _apply_bids_to_player_data(self, in_data):
         for wager_data in in_data:
             if isinstance(wager_data, dict) and (wager_data.get('valid', False)):
                 race_num = wager_data.get('race_number', 0)
@@ -143,6 +147,44 @@ class AppManager:
 
                 with self.global_lock:
                     self.player_manager.place_bids(total, player_id=str(player_id))
+
+    def finalize_race(self, race_num, win_post, place_post, show_post):
+        with self.global_lock:
+            if not self.race_manager.is_valid_race(race_num):
+                raise ValueError('Received invalid race number: {}'.format(race_num))
+
+            if self.race_manager.has_results(race_num):
+                raise ValueError('Race results already set for race {}'.format(race_num))
+            
+            if not all(1 <= int(h) <= 20 for h in [win_post, place_post, show_post]):
+                raise ValueError('Invalid posts: {}, {}, {}'.format(win_post, place_post, show_post))
+            
+            if len(list(set([win_post, place_post, show_post]))) != 3:
+                raise ValueError('Expected win, place, and show posts to be unique. Received {}, {}, {}'.format(win_post, place_post, show_post))
+            
+            self.race_manager.set_results(race_num, win_post, place_post, show_post)
+            
+            result_map = {
+                'win': [win_post],
+                'place': [place_post, win_post],
+                'show': [show_post, place_post, win_post]
+            }
+
+            for bet_type, posts in result_map.items():
+                pool_dict = self.pool_manager.get_pool_info(race_num, spec_pool=bet_type)
+                pool_total = self.pool_manager.total_in_bet_type(race_num, bet_type)
+                wagers = self.wager_state.get_wagers_by_race(race_num)
+
+                first_payout, last_payout = self.payout_calculator.calculate_payouts(race_num, bet_type, posts, pool_dict, wagers, pool_total)
+                race_payouts = self.payout_calculator.get_payouts_between_ids(first_payout, last_payout)
+
+                for transaction in race_payouts:
+                    profit = float(transaction.get('bid_profit', 0.))
+                    player_id = transaction.get('player_id', 0)
+                    if (profit <= 0):
+                        self.player_manager.set_losing_bid(abs(profit), player_id=player_id)
+                    else:
+                        self.player_manager.set_winning_bid(abs(profit), transaction.get('bid_wagered', 0), player_id=player_id)
 
 
 app_manager = AppManager()
@@ -165,8 +207,7 @@ def process_wager(wager_data):
     save_latest_wager(wager_dir, wager_data, processed=False)
     
     valid_wagers = app_manager.validate_wager_data(wager_data)  # Wager validation
-    app_manager.apply_bids_to_pool(valid_wagers)  # Apply wager to pool tracking data
-    app_manager.apply_bids_to_player_data(valid_wagers)  # Apply wager to player data
+    app_manager.place_valid_wagers(valid_wagers)  # Post validated wagers to relevant pools and player data
 
     save_latest_wager(wager_dir, valid_wagers, processed=True)
 
