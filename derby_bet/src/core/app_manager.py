@@ -3,7 +3,6 @@ from time import sleep
 from pathlib import Path
 import threading
 import pandas as pd
-from googleapiclient.discovery import build
 
 from derby_bet.src.utils import google_api as gapi
 from derby_bet.src.utils.io_tools import find_project_root
@@ -106,6 +105,14 @@ class AppManager:
 
         return output_wagers
 
+    def validate_transaction_data(self, trsc_data):
+        output_trsc = []
+        
+        for trsc in trsc_data:
+            pass
+        
+        return output_trsc
+
     def place_valid_wagers(self, in_data):
         self._apply_bids_to_pool(in_data)
         self._apply_bids_to_player_data(in_data)
@@ -201,6 +208,17 @@ def save_latest_wager(wager_dir, wager_data, processed=False):
         }) + '\n')
 
 
+def save_latest_trsc(trsc_dir, trsc_data, processed=False):
+    if not Path(trsc_dir).exists():
+        Path(trsc_dir).mkdir(parents=True)
+    proc = 'processed' if processed else 'unprocessed'
+    with open(str(Path(trsc_dir, f'transaction_timeline_{proc}.json')), 'a') as file:
+        file.write(json.dumps({
+            'timestamp': datetime.now().isoformat(),
+            'transaction': trsc_data
+        }) + '\n')
+
+
 def process_wager(wager_data):
     print(f'Processing wager: {wager_data}')
     wager_dir = Path(_DRB_DIR, 'wagers')
@@ -214,13 +232,34 @@ def process_wager(wager_data):
     return valid_wagers
 
 
-def output_state(state_data, processed=False):
+def process_transaction(trsc_data):
+    print(f'Processing transaction: {trsc_data}')
+    trsc_dir = Path(_DRB_DIR, 'transactions')
+    save_latest_trsc(trsc_dir, trsc_data, processed=False)
+    
+    valid_trsc = app_manager.validate_transaction_data(trsc_data)  # Wager validation
+
+    save_latest_trsc(trsc_dir, valid_trsc, processed=True)
+
+    return valid_trsc
+
+
+def output_state_wgr(state_data, processed=False):
     wager_dir = Path(_DRB_DIR, 'wagers')
     if not Path(wager_dir).exists():
         Path(wager_dir).mkdir(parents=True)
     df = pd.DataFrame(state_data)
     proc = 'processed' if processed else 'unprocessed'
     df.to_csv(str(Path(wager_dir, f'wager_state_{proc}.csv')), index=False)
+
+
+def output_state_trs(state_data, processed=False):
+    trsc_dir = Path(_DRB_DIR, 'transactions')
+    if not Path(trsc_dir).exists():
+        Path(trsc_dir).mkdir(parents=True)
+    df = pd.DataFrame(state_data)
+    proc = 'processed' if processed else 'unprocessed'
+    df.to_csv(str(Path(trsc_dir, f'transactions_{proc}.csv')), index=False)
 
 
 def poll_wagers(update_time=5):
@@ -231,8 +270,8 @@ def poll_wagers(update_time=5):
             new_processed = process_wager(new_responses)
             app_manager.wager_state.update(new_responses, new_processed, len(all_responses))
             if (len(new_responses) > 0):
-                output_state(app_manager.wager_state.get_all(processed=False), processed=False)
-                output_state(app_manager.wager_state.get_all(processed=True), processed=True)
+                output_state_wgr(app_manager.wager_state.get_all(processed=False), processed=False)
+                output_state_wgr(app_manager.wager_state.get_all(processed=True), processed=True)
 
             print(f'Processed {len(new_processed)} new wagers. Total received: {len(all_responses)}')
 
@@ -242,7 +281,33 @@ def poll_wagers(update_time=5):
         sleep(update_time)
 
 
+def poll_transactions(update_time=10):
+    while True:
+        try:
+            all_responses = gapi.get_form_responses(gapi.TRANSACTION_RANGE_NAME)
+            new_responses = all_responses[app_manager.transaction_manager.last_processed_row:]
+            new_processed = process_transaction(new_responses)  # TODO: @PF FIX
+            app_manager.transaction_manager.update(new_responses, new_processed, len(all_responses))
+            if (len(new_responses) > 0):
+                output_state_trs(app_manager.transaction_manager.get_all(processed=False), processed=False)
+                output_state_trs(app_manager.transaction_manager.get_all(processed=True), processed=True)
+
+            print(f'Processed {len(new_processed)} new transactions. Total received: {len(all_responses)}')
+
+        except Exception as e:
+            print(f'Error polling sheets for transactions: {e}')
+        
+        sleep(update_time)
+
+
 def start_background_polling():
-    polling_thread = threading.Thread(target=poll_wagers, daemon=True)
-    polling_thread.start()
+    poll_wgrs = threading.Thread(target=poll_wagers, daemon=True)
+    poll_wgrs.start()
+    poll_trsc = threading.Thread(target=poll_transactions, daemon=True)
+    poll_trsc.start()
     print('Background polling started')
+
+
+if __name__ == '__main__':
+    start_background_polling()
+    sleep(1200)
