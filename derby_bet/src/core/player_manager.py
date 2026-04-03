@@ -46,6 +46,7 @@ class PlayerManager:
         self.lock = threading.Lock()
         self.players = self._load_players()
         self.total_players = None
+        self.all_player_ids = []
         self._update_player_count()
 
     def _get_player_file(self):
@@ -77,6 +78,7 @@ class PlayerManager:
     
     def _update_player_count(self):
         self.total_players = len(self.players.keys())
+        self.all_player_ids = sorted(list(self.players.keys()))
     
     def _timestamp_player_change(self, player_id):
         with self.lock:
@@ -310,5 +312,3 @@ class PlayerManager:
     def validate_bids(self, player_name=None, player_id=None):
         bid_data = self.get_bids_data(player_name=player_name, player_id=player_id)
         return bid_data.get('available', 0) == (bid_data.get('purchased', 0), + bid_data.get('won', 0) - bid_data.get('placed', 0))
-
-_PLAYER_MANAGER = PlayerManager()

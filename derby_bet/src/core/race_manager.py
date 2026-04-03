@@ -162,5 +162,3 @@ class RaceManager:
         with self.lock:
             self.races[str(int(race_id))] = new_race
         self._save_races()
-
-_RACE_MANAGER = RaceManager()

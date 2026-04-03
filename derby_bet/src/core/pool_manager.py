@@ -168,6 +168,13 @@ class PoolManager:
         for v in pool.values():
             total += int(round(float(v), 0))
         return total
-
-
-_POOL_MANAGER = PoolManager()            
+    
+    def total_in_bet_type(self, race_num, bet_type):
+        if 'win' in bet_type.lower():
+            return self.total_in_win(race_num)
+        elif 'place' in bet_type.lower():
+            return self.total_in_place(race_num)
+        elif 'show' in bet_type.lower():
+            return self.total_in_show(race_num)
+        else:
+            raise LookupError('Invalid bet type received: {}'.format(bet_type))
