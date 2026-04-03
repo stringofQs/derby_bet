@@ -63,8 +63,3 @@ class WagerState:
                     filtered_wagers.append(wager)
 
         return filtered_wagers  
-
-
-if __name__ == '__main__':
-    start_background_polling()
-    sleep(1200)
