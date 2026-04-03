@@ -1,11 +1,7 @@
 # Imports
 from pathlib import Path
 import threading
-from derby_bet.src.utils.io_tools import find_project_root
 
-
-_BASE_DIR = find_project_root()
-_DRB_DIR = Path(_BASE_DIR, 'drb')
 
 class WagerState:
 
