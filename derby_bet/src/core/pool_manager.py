@@ -1,9 +1,9 @@
 # Imports
 from pathlib import Path
 import datetime as dt
-from typing import Optional, Dict, List
 import json
 import threading
+import logging
 
 from derby_bet.src.utils.io_tools import find_project_root
 
@@ -41,6 +41,7 @@ class PoolManager:
     """
 
     def __init__(self):
+        logging.info('Initialize PoolManager')
         self.pool_file = None
         self._get_pool_file()
         self.lock = threading.Lock()
@@ -134,16 +135,19 @@ class PoolManager:
         self._save_pools()
 
     def apply_to_win_pool(self, race_num, post, amount):
+        logging.debug(f'Apply {amount} to win pool for post {post} in race {race_num}')
         curr_win = self.get_from_win_pool(race_num, post)
         new_total = int(curr_win) + int(amount)
         self.set_win_pool(race_num, post, new_total)
         
     def apply_to_place_pool(self, race_num, post, amount):
+        logging.debug(f'Apply {amount} to place pool for post {post} in race {race_num}')
         curr_win = self.get_from_place_pool(race_num, post)
         new_total = int(curr_win) + int(amount)
         self.set_place_pool(race_num, post, new_total)
         
     def apply_to_show_pool(self, race_num, post, amount):
+        logging.debug(f'Apply {amount} to show pool for post {post} in race {race_num}')
         curr_win = self.get_from_show_pool(race_num, post)
         new_total = int(curr_win) + int(amount)
         self.set_show_pool(race_num, post, new_total)
@@ -177,4 +181,5 @@ class PoolManager:
         elif 'show' in bet_type.lower():
             return self.total_in_show(race_num)
         else:
+            logging.error(f'Invalid bet type received for looking up bet total: {bet_type}')
             raise LookupError('Invalid bet type received: {}'.format(bet_type))
