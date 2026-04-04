@@ -1,6 +1,7 @@
 # Imports
 from pathlib import Path
 import threading
+import logging
 
 
 class TransactionManager:
@@ -8,12 +9,14 @@ class TransactionManager:
     _BID_VALUE_ = 0.1  # 1 bid = $0.10
 
     def __init__(self):
+        logging.info('Initialized TransactionManager')
         self.all_transactions_unprocessed = []
         self.all_transactions_processed = []
         self.last_processed_row = 0
         self.lock = threading.Lock()
     
     def update(self, new_unp_transactions, new_proc_transactions, total_rows):
+        logging.debug(f'Updating transactions to new total {total_rows}')
         with self.lock:
             self.all_transactions_unprocessed.extend(new_unp_transactions)
             self.all_transactions_processed.extend(new_proc_transactions)

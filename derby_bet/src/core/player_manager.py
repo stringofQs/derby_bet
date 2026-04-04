@@ -189,6 +189,7 @@ class PlayerManager:
         elif bid_category.lower() == 'placed':
             self.set_bids_placed(bid_amount, player_name=player_name, player_id=player_id)
         else:
+            logging.error(f'Received {bid_category}, which is invalid or unexpected for setting')
             raise ValueError('Invalid bid category: {}'.format(bid_category))
 
     def set_bids_purchased(self, bid_amount, player_name=None, player_id=None):
@@ -268,6 +269,7 @@ class PlayerManager:
         elif any([i in from_bid.lower() for i in ['place', 'placed']]):
             from_bid = 'placed'
         else:
+            logging.error(f'Received {from_bid}, which is invalid or unexpected for exchange')
             raise LookupError('Invalid "from_bid" received in exchange: {}'.format(from_bid))
         
         # Determine the to_bid
@@ -284,6 +286,7 @@ class PlayerManager:
         elif any([i in to_bid.lower() for i in ['place', 'placed']]):
             to_bid = 'placed'
         else:
+            logging.error(f'Received {to_bid}, which is invalid or unexpected for exchange')
             raise LookupError('Invalid "to_bid" received in exchange: {}'.format(to_bid))
         
         bid_data = self.get_bids_data(player_name=player_name, player_id=player_id)
