@@ -3,10 +3,12 @@ from time import sleep
 from pathlib import Path
 import threading
 import pandas as pd
+import json
+import datetime as dt
 
 from derby_bet.src.utils import google_api as gapi
 from derby_bet.src.utils.io_tools import find_project_root
-from derby_bet.src.core.data_validation import normalize_wager_fields, normalize_wager_values, normalize_trsc_fields
+from derby_bet.src.core.data_validation import normalize_wager_fields, normalize_wager_values, normalize_trsc_fields, normalize_trsc_values
 from derby_bet.src.core.transaction_manager import TransactionManager
 from derby_bet.src.core.race_manager import RaceManager
 from derby_bet.src.core.player_manager import PlayerManager
@@ -16,6 +18,7 @@ from derby_bet.src.core.payout_calculator import PayoutCalculator
 
 
 _BASE_DIR = find_project_root()
+_DRB_DIR = Path(_BASE_DIR, 'drb')
 
 
 class AppManager:
@@ -240,7 +243,7 @@ def save_latest_wager(wager_dir, wager_data, processed=False):
     proc = 'processed' if processed else 'unprocessed'
     with open(str(Path(wager_dir, f'wager_timeline_{proc}.json')), 'a') as file:
         file.write(json.dumps({
-            'timestamp': datetime.now().isoformat(),
+            'timestamp': dt.datetime.now().isoformat(),
             'wager': wager_data
         }) + '\n')
 
@@ -251,7 +254,7 @@ def save_latest_trsc(trsc_dir, trsc_data, processed=False):
     proc = 'processed' if processed else 'unprocessed'
     with open(str(Path(trsc_dir, f'transaction_timeline_{proc}.json')), 'a') as file:
         file.write(json.dumps({
-            'timestamp': datetime.now().isoformat(),
+            'timestamp': dt.datetime.now().isoformat(),
             'transaction': trsc_data
         }) + '\n')
 

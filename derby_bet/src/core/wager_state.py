@@ -33,7 +33,7 @@ class WagerState:
             
         return filtered_wagers
     
-    def get_wagers_by_player(self, player_name=None, player_id=None)
+    def get_wagers_by_player(self, player_name=None, player_id=None):
         assert (not isinstance(player_name, type(None))) or (not isinstance(player_id, type(None))), 'Expected either player name or player ID to be populated.'
 
         proc_wagers = self.get_all(processed=True)
