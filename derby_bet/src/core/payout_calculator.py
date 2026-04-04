@@ -134,11 +134,11 @@ class PayoutCalculator:
         transactions = []
 
         if len(pool_dict.keys()) == 0:
-            print('No pool data for: Race={} | Bet={}'.format(race_num, bet_type))
+            logging.warning('No pool data for: Race={} | Bet={}'.format(race_num, bet_type))
             return transactions
 
         if total_pool == 0:
-            print('Pool total is 0 for Race={} | Bet={}'.format(race_num, bet_type))
+            logging.warning('Pool total is 0 for Race={} | Bet={}'.format(race_num, bet_type))
         
         win_amount = sum([pool_dict.get(str(post), 0) for post in posts])
 
