@@ -6,7 +6,8 @@ import pandas as pd
 
 from derby_bet.src.utils import google_api as gapi
 from derby_bet.src.utils.io_tools import find_project_root
-from derby_bet.src.core.wager_validation import normalize_wager_fields, normalize_wager_values
+from derby_bet.src.core.data_validation import normalize_wager_fields, normalize_wager_values, normalize_trsc_fields
+from derby_bet.src.core.transaction_manager import TransactionManager
 from derby_bet.src.core.race_manager import RaceManager
 from derby_bet.src.core.player_manager import PlayerManager
 from derby_bet.src.core.pool_manager import PoolManager
@@ -37,6 +38,7 @@ class AppManager:
         self.global_lock = threading.Lock()
 
         # Initialize all managers
+        self.transaction_manager = TransactionManager()
         self.race_manager = RaceManager()
         self.player_manager = PlayerManager()
         self.pool_manager = PoolManager()
@@ -109,7 +111,33 @@ class AppManager:
         output_trsc = []
         
         for trsc in trsc_data:
-            pass
+            errors = []
+            out1 = normalize_trsc_fields(trsc)
+            norm_trsc_data = normalize_trsc_values(out1)
+
+            with self.global_lock:
+                player_id = norm_trsc_data.get('player_id', 0)
+                if not self.player_manager.is_valid_player(player_id=player_id):
+                    errors.append('Invalid player ID received in transaction: {}'.format(player_id))
+                
+                amount_received = float(norm_trsc_data.get('amount_received', 0.))
+                if amount_received <= 0.:
+                    errors.append('Invalid transaction amount received: {}'.format(amount_received))
+                    bids_received = 0
+                else:
+                    bids_received = amount_received / self.transaction_manager._BID_VALUE_
+                
+                norm_trsc_data['bids_received'] = float(bids_received)
+                
+                if (len(errors) > 0):
+                    norm_trsc_data['valid'] = False
+                else:
+                    norm_trsc_data['valid'] = True
+                
+                err_str = '; '.join(errors)
+                norm_trsc_data['errors'] = err_str
+
+                output_trsc.append(norm_trsc_data)
         
         return output_trsc
 
@@ -154,6 +182,15 @@ class AppManager:
 
                 with self.global_lock:
                     self.player_manager.place_bids(total, player_id=str(player_id))
+
+    def receive_player_transactions(self, trsc_data):
+        for trsc in trsc_data:
+            if isinstance(trsc, dict) and (trsc.get('valid', False)):
+                player_id = trsc.get('player_id', 0)
+                bids_received = trsc.get('bids_received', 0.)
+
+                with self.global_lock:
+                    self.player_manager.purchase_bids(bids_received, player_id=str(player_id))
 
     def finalize_race(self, race_num, win_post, place_post, show_post):
         with self.global_lock:
@@ -238,6 +275,7 @@ def process_transaction(trsc_data):
     save_latest_trsc(trsc_dir, trsc_data, processed=False)
     
     valid_trsc = app_manager.validate_transaction_data(trsc_data)  # Wager validation
+    app_manager.receive_player_transactions(valid_trsc)
 
     save_latest_trsc(trsc_dir, valid_trsc, processed=True)
 
