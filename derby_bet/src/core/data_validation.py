@@ -1,20 +1,3 @@
-# Imports
-from pathlib import Path
-import datetime as dt
-from typing import Dict, Tuple, Optional, List
-import threading
-import csv
-import json
-
-from derby_bet.src.utils.io_tools import find_project_root
-
-
-_BASE_DIR = find_project_root()
-_DRB_DIR = Path(_BASE_DIR, 'drb')
-_WAGER_DIR = Path(_DRB_DIR, 'wagers')
-_UNPROC_WAGERS = Path(_WAGER_DIR, 'wager_state_unprocessed.csv')
-_PROC_WAGERS = Path(_WAGER_DIR, 'wager_state_processed.csv')
-
 
 def normalize_wager_fields(wager_data):
     field_map = {
@@ -37,6 +20,28 @@ def normalize_wager_fields(wager_data):
     output = {}
     for k, v in wager_data.items():
         output[field_map.get(k, k.lower().strip().replace(' ', '_'))] = v
+    return output
+
+
+def normalize_trsc_fields(trsc_data):
+    field_map = {
+        'Timestamp': 'timestamp_google', 
+        'PlayerID': 'player_id',
+        'Player ID': 'player_id',
+        'VenmoAmount': 'amount_received',
+        'Venmo Amount': 'amount_received'
+    }
+
+    output = {}
+    for k, v in trsc_data.items():
+        output[field_map.get(k, k.lower().strip().replace(' ', '_'))] = v
+    return output
+
+
+def normalize_trsc_values(trsc_data):
+    output = trsc_data.copy()
+    output['player_id'] = int(output.get('player_id', 0))
+    output['amount_received'] = float(output.get('amount_received', 0.))
     return output
 
 

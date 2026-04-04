@@ -311,4 +311,4 @@ class PlayerManager:
     
     def validate_bids(self, player_name=None, player_id=None):
         bid_data = self.get_bids_data(player_name=player_name, player_id=player_id)
-        return bid_data.get('available', 0) == (bid_data.get('purchased', 0), + bid_data.get('won', 0) - bid_data.get('placed', 0))
+        return bid_data.get('available', 0) == (bid_data.get('purchased', 0) + bid_data.get('won', 0) - bid_data.get('placed', 0))

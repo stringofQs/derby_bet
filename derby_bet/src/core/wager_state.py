@@ -1,11 +1,7 @@
 # Imports
 from pathlib import Path
 import threading
-from derby_bet.src.utils.io_tools import find_project_root
 
-
-_BASE_DIR = find_project_root()
-_DRB_DIR = Path(_BASE_DIR, 'drb')
 
 class WagerState:
 
@@ -37,7 +33,7 @@ class WagerState:
             
         return filtered_wagers
     
-    def get_wagers_by_player(self, player_name=None, player_id=None)
+    def get_wagers_by_player(self, player_name=None, player_id=None):
         assert (not isinstance(player_name, type(None))) or (not isinstance(player_id, type(None))), 'Expected either player name or player ID to be populated.'
 
         proc_wagers = self.get_all(processed=True)
@@ -63,8 +59,3 @@ class WagerState:
                     filtered_wagers.append(wager)
 
         return filtered_wagers  
-
-
-if __name__ == '__main__':
-    start_background_polling()
-    sleep(1200)
