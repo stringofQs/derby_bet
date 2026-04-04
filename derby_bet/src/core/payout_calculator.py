@@ -64,7 +64,7 @@ class PayoutCalculator:
                 'bid_profit': float(bids_paid) - float(bids_wagered)
             }
         
-        logging.info('New payout received')
+        logging.debug('New payout received')
         self.next_transaction_id = len(self.payouts.keys())
         self._save_payouts()
 
