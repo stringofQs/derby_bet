@@ -5,6 +5,8 @@ import threading
 
 class TransactionManager:
 
+    _BID_VALUE_ = 0.1  # 1 bid = $0.10
+
     def __init__(self):
         self.all_transactions_unprocessed = []
         self.all_transactions_processed = []
