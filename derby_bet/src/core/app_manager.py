@@ -5,9 +5,11 @@ import threading
 import pandas as pd
 import json
 import datetime as dt
+import logging
 
 from derby_bet.src.utils import google_api as gapi
 from derby_bet.src.utils.io_tools import find_project_root
+from derby_bet.src.utils.log_utils import setup_logger
 from derby_bet.src.core.data_validation import normalize_wager_fields, normalize_wager_values, normalize_trsc_fields, normalize_trsc_values
 from derby_bet.src.core.transaction_manager import TransactionManager
 from derby_bet.src.core.race_manager import RaceManager
@@ -16,6 +18,8 @@ from derby_bet.src.core.pool_manager import PoolManager
 from derby_bet.src.core.wager_state import WagerState
 from derby_bet.src.core.payout_calculator import PayoutCalculator
 
+setup_logger('error_log', level=logging.ERROR, console=True, file=True, filename='error.log')
+setup_logger('debug_log', level=logging.DEBUG, console=False, file=True, filename='debug.log')
 
 _BASE_DIR = find_project_root()
 _DRB_DIR = Path(_BASE_DIR, 'drb')
@@ -51,6 +55,7 @@ class AppManager:
         self._initialized = True
 
     def validate_wager_data(self, wager_data):
+        logging.debug('Validating wager data.')
         output_wagers = []
 
         for wager in wager_data:
@@ -106,11 +111,15 @@ class AppManager:
                 err_str = '; '.join(errors)
                 norm_wager_data['errors'] = err_str
 
+                if len(errors) > 0:
+                    logging.error('Wager validation error(s): {}'.format(err_str))
+
                 output_wagers.append(norm_wager_data)
 
         return output_wagers
 
     def validate_transaction_data(self, trsc_data):
+        logging.debug('Validating transaction data.')
         output_trsc = []
         
         for trsc in trsc_data:
@@ -139,6 +148,9 @@ class AppManager:
                 
                 err_str = '; '.join(errors)
                 norm_trsc_data['errors'] = err_str
+
+                if len(errors) > 0:
+                    logging.error('Transaction validation error(s): {}'.format(err_str))
 
                 output_trsc.append(norm_trsc_data)
         
@@ -196,17 +208,22 @@ class AppManager:
                     self.player_manager.purchase_bids(bids_received, player_id=str(player_id))
 
     def finalize_race(self, race_num, win_post, place_post, show_post):
+        logging.info('Finalize Race: race_num={} | win_post={} | place_post={} | show_post={}'.format(race_num, win_post, place_post, show_post))
         with self.global_lock:
             if not self.race_manager.is_valid_race(race_num):
+                logging.error('Invalid race number: {}'.format(race_num))
                 raise ValueError('Received invalid race number: {}'.format(race_num))
 
             if self.race_manager.has_results(race_num):
+                logging.error('Race results already exist for race {}'.format(race_num))
                 raise ValueError('Race results already set for race {}'.format(race_num))
             
             if not all(1 <= int(h) <= 20 for h in [win_post, place_post, show_post]):
+                logging.error('Invalid post values received: {}, {}, {}'.format(win_post, place_post, show_post))
                 raise ValueError('Invalid posts: {}, {}, {}'.format(win_post, place_post, show_post))
             
             if len(list(set([win_post, place_post, show_post]))) != 3:
+                logging.error('Non-unique post values received: {}'.format(win_post, place_post, show_post))
                 raise ValueError('Expected win, place, and show posts to be unique. Received {}, {}, {}'.format(win_post, place_post, show_post))
             
             self.race_manager.set_results(race_num, win_post, place_post, show_post)
@@ -241,6 +258,7 @@ def save_latest_wager(wager_dir, wager_data, processed=False):
     if not Path(wager_dir).exists():
         Path(wager_dir).mkdir(parents=True)
     proc = 'processed' if processed else 'unprocessed'
+    logging.debug('Saving {} wager data'.format(proc))
     with open(str(Path(wager_dir, f'wager_timeline_{proc}.json')), 'a') as file:
         file.write(json.dumps({
             'timestamp': dt.datetime.now().isoformat(),
@@ -252,6 +270,7 @@ def save_latest_trsc(trsc_dir, trsc_data, processed=False):
     if not Path(trsc_dir).exists():
         Path(trsc_dir).mkdir(parents=True)
     proc = 'processed' if processed else 'unprocessed'
+    logging.debug('Saving {} transaction data'.format(proc))
     with open(str(Path(trsc_dir, f'transaction_timeline_{proc}.json')), 'a') as file:
         file.write(json.dumps({
             'timestamp': dt.datetime.now().isoformat(),
@@ -260,7 +279,7 @@ def save_latest_trsc(trsc_dir, trsc_data, processed=False):
 
 
 def process_wager(wager_data):
-    print(f'Processing wager: {wager_data}')
+    logging.debug('Processing wager')
     wager_dir = Path(_DRB_DIR, 'wagers')
     save_latest_wager(wager_dir, wager_data, processed=False)
     
@@ -273,7 +292,7 @@ def process_wager(wager_data):
 
 
 def process_transaction(trsc_data):
-    print(f'Processing transaction: {trsc_data}')
+    logging.debug('Processing transaction')
     trsc_dir = Path(_DRB_DIR, 'transactions')
     save_latest_trsc(trsc_dir, trsc_data, processed=False)
     
@@ -291,6 +310,7 @@ def output_state_wgr(state_data, processed=False):
         Path(wager_dir).mkdir(parents=True)
     df = pd.DataFrame(state_data)
     proc = 'processed' if processed else 'unprocessed'
+    logging.debug('Outputting {} wager state dataset'.format(proc))
     df.to_csv(str(Path(wager_dir, f'wager_state_{proc}.csv')), index=False)
 
 
@@ -300,6 +320,7 @@ def output_state_trs(state_data, processed=False):
         Path(trsc_dir).mkdir(parents=True)
     df = pd.DataFrame(state_data)
     proc = 'processed' if processed else 'unprocessed'
+    logging.debug('Outputting {} transaction state dataset'.format(proc))
     df.to_csv(str(Path(trsc_dir, f'transactions_{proc}.csv')), index=False)
 
 
@@ -314,10 +335,10 @@ def poll_wagers(update_time=5):
                 output_state_wgr(app_manager.wager_state.get_all(processed=False), processed=False)
                 output_state_wgr(app_manager.wager_state.get_all(processed=True), processed=True)
 
-            print(f'Processed {len(new_processed)} new wagers. Total received: {len(all_responses)}')
+            logging.info(f'Processed {len(new_processed)} new wagers. Total received: {len(all_responses)}')
 
         except Exception as e:
-            print(f'Error polling sheets for wagers: {e}')
+            logging.error(f'Error polling sheets for wagers: {e}', exc_info=True)
         
         sleep(update_time)
 
@@ -333,10 +354,10 @@ def poll_transactions(update_time=10):
                 output_state_trs(app_manager.transaction_manager.get_all(processed=False), processed=False)
                 output_state_trs(app_manager.transaction_manager.get_all(processed=True), processed=True)
 
-            print(f'Processed {len(new_processed)} new transactions. Total received: {len(all_responses)}')
+            logging.info(f'Processed {len(new_processed)} new transactions. Total received: {len(all_responses)}')
 
         except Exception as e:
-            print(f'Error polling sheets for transactions: {e}')
+            logging.error(f'Error polling sheets for transactions: {e}')
         
         sleep(update_time)
 
@@ -346,7 +367,7 @@ def start_background_polling():
     poll_wgrs.start()
     poll_trsc = threading.Thread(target=poll_transactions, daemon=True)
     poll_trsc.start()
-    print('Background polling started')
+    logging.info('Background polling started')
 
 
 if __name__ == '__main__':
