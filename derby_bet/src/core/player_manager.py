@@ -41,6 +41,7 @@ class PlayerManager:
     _map_name_id_dict = {}
 
     def __init__(self):
+        logging.info('Initialize PlayerManager')
         self.player_file = None
         self._get_player_file()
         self.lock = threading.Lock()
@@ -96,6 +97,7 @@ class PlayerManager:
         try:
             _ = self.get_player_info(player_name=player_name, player_id=player_id)
         except Exception as _:
+            logging.warning('Player received is invalid: {} | {}'.format(player_name, player_id))
             return False
         return True
 
@@ -118,7 +120,8 @@ class PlayerManager:
                         'placed': 0
                     }
                 }
-
+            
+            logging.info('New player added: {} | {}'.format(player_name, new_id))
             self._timestamp_player_change(int(new_id))
             self._map_name_id_dict[player_name] = str(int(new_id))
             self._update_player_count()
@@ -163,6 +166,7 @@ class PlayerManager:
         return bids.get('placed', 0)
 
     def set_bid_data(self, bid_data, player_name=None, player_id=None):
+        logging.debug('Setting bid data for player ID {}...'.format(player_id))
         ind_plyr = self.get_player_info(player_name=player_name, player_id=player_id)
         ind_plyr['bids'] = bid_data.copy()
 
@@ -185,6 +189,7 @@ class PlayerManager:
         elif bid_category.lower() == 'placed':
             self.set_bids_placed(bid_amount, player_name=player_name, player_id=player_id)
         else:
+            logging.error(f'Received {bid_category}, which is invalid or unexpected for setting')
             raise ValueError('Invalid bid category: {}'.format(bid_category))
 
     def set_bids_purchased(self, bid_amount, player_name=None, player_id=None):
@@ -246,6 +251,7 @@ class PlayerManager:
         return int(bids_avail) >= int(bid_amount)
     
     def apply_bid_exchange(self, bids, from_bid, to_bid, player_name=None, player_id=None):
+        logging.debug('Exchanging {} bids for player ID {} from {} to {}'.format(bids, player_id, from_bid, to_bid))
         assert isinstance(from_bid, str), 'Expected a string to indicate where the bid exchange is coming from. Received {}'.format(from_bid)
         assert isinstance(to_bid, str), 'Expected a string to indicate where the bid exchange is going to. Received {}'.format(to_bid)
 
@@ -263,6 +269,7 @@ class PlayerManager:
         elif any([i in from_bid.lower() for i in ['place', 'placed']]):
             from_bid = 'placed'
         else:
+            logging.error(f'Received {from_bid}, which is invalid or unexpected for exchange')
             raise LookupError('Invalid "from_bid" received in exchange: {}'.format(from_bid))
         
         # Determine the to_bid
@@ -279,6 +286,7 @@ class PlayerManager:
         elif any([i in to_bid.lower() for i in ['place', 'placed']]):
             to_bid = 'placed'
         else:
+            logging.error(f'Received {to_bid}, which is invalid or unexpected for exchange')
             raise LookupError('Invalid "to_bid" received in exchange: {}'.format(to_bid))
         
         bid_data = self.get_bids_data(player_name=player_name, player_id=player_id)
@@ -290,10 +298,12 @@ class PlayerManager:
                 self._set_bids_custom(to_total + bids, to_bid, player_name=player_name, player_id=player_id)
             
     def purchase_bids(self, amount, player_name=None, player_id=None):
+        logging.info(f'Purchase {amount} bids for player {player_name} | {player_id}')
         self.change_bids_purchased(amount, player_name=player_name, player_id=player_id)
         self.change_bids_available(amount, player_name=player_name, player_id=player_id)
 
     def place_bids(self, amount, player_name=None, player_id=None):
+        logging.info(f'Place {amount} bids for player {player_name} | {player_id}')
         self.change_bids_available(-amount, player_name=player_name, player_id=player_id)
         self.change_bids_pending(amount, player_name=player_name, player_id=player_id)
         self.change_bids_placed(amount, player_name=player_name, player_id=player_id)
@@ -301,14 +311,17 @@ class PlayerManager:
     def set_winning_bid(self, amount_won, associated_pending, player_name=None, player_id=None):
         # When a bid is won, the total amount of bids won will be applied to both the "won" and "available" categories
         # Additionally, the amount in the associated pending will be removed (this amount is all bid amount on this current race)
+        logging.info(f'Win {amount_won} bids for player {player_name} | {player_id}')
         self.change_bids_won(amount_won, player_name=player_name, player_id=player_id)
         self.change_bids_available(amount_won, player_name=player_name, player_id=player_id)
         self.change_bids_pending(-associated_pending, player_name=player_name, player_id=player_id)
 
     def set_losing_bid(self, amount_lost, player_name=None, player_id=None):
+        logging.info(f'Lost {amount_lost} bids for player {player_name} | {player_id}')
         self.change_bids_pending(-amount_lost, player_name=player_name, player_id=player_id)
         self.change_bids_lost(amount_lost, player_name=player_name, player_id=player_id)
     
     def validate_bids(self, player_name=None, player_id=None):
+        logging.debug(f'Validating bid values for player {player_name} | {player_id}')
         bid_data = self.get_bids_data(player_name=player_name, player_id=player_id)
         return bid_data.get('available', 0) == (bid_data.get('purchased', 0) + bid_data.get('won', 0) - bid_data.get('placed', 0))

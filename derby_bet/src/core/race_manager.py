@@ -1,9 +1,9 @@
 # Imports
 from pathlib import Path
 import datetime as dt
-from typing import Optional, Dict, List
 import json
 import threading
+import logging
 
 from derby_bet.src.utils.io_tools import find_project_root
 
@@ -34,6 +34,7 @@ class RaceManager:
     """
 
     def __init__(self):
+        logging.info('Initialize RaceManager')
         self.races_file = None
         self._get_race_file()
         self.lock = threading.Lock()
@@ -83,6 +84,7 @@ class RaceManager:
         return len(race_data.keys()) > 0
 
     def set_results(self, race_num, win, place, show):
+        logging.info(f'Setting race results for race {race_num} to win={win}, place={place}, show={show}')
         ind_race = self.get_race_info(race_num)
         
         ind_race['win'] = win
@@ -138,6 +140,7 @@ class RaceManager:
         return prev_rece            
     
     def close_betting(self, race_num):
+        logging.info(f'Closing betting for {race_num}')
         ind_race = self.get_race_info(race_num)
         ind_race['status'] = 'closed'
 
@@ -147,6 +150,7 @@ class RaceManager:
 
     def add_race(self, race_id, race_desc, post_time):
         if str(int(race_id)) in self.races.keys():
+            logging.error(f'Race ID {race_id} already exists. Could not add a new race.')
             raise KeyError('The race ID provided ({}) already exists.'.format(race_id))
         
         new_race = {
@@ -158,6 +162,7 @@ class RaceManager:
             'show': None,
             'status': 'pending'
         }
+        logging.info(f'Added new race {race_id}')
 
         with self.lock:
             self.races[str(int(race_id))] = new_race

@@ -2,6 +2,10 @@
 from pathlib import Path
 import logging
 
+from derby_bet.src.utils.io_tools import find_project_root
+
+_BASE_DIR = find_project_root()
+
 
 def setup_logger(name, level=logging.INFO, console=False, file=False, filename='out.log'):
     logger = logging.getLogger(name)
@@ -21,8 +25,9 @@ def setup_logger(name, level=logging.INFO, console=False, file=False, filename='
         logger.addHandler(console_handler)
     
     if file:
-        _check_logger_file(filename)
-        file_handler = logging.FileHandler(filename)
+        file_out = Path(_BASE_DIR, 'derby_bet', 'log', filename)
+        _check_logger_file(file_out)
+        file_handler = logging.FileHandler(file_out)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
 

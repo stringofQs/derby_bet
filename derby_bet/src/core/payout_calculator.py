@@ -1,11 +1,10 @@
 # Imports
-from typing import Dict, List, Tuple
-import csv
 import json
 from pathlib import Path
 import datetime as dt
 import threading
 import pandas as pd
+import logging
 
 from derby_bet.src.utils.io_tools import find_project_root
 
@@ -20,6 +19,7 @@ if not Path(PAY_DIR).exists():
 class PayoutCalculator:
 
     def __init__(self):
+        logging.info('Initialize PayoutCalculator')
         self.payout_file = None
         self._get_payout_file()
         self.lock = threading.Lock()
@@ -64,6 +64,7 @@ class PayoutCalculator:
                 'bid_profit': float(bids_paid) - float(bids_wagered)
             }
         
+        logging.debug('New payout received')
         self.next_transaction_id = len(self.payouts.keys())
         self._save_payouts()
 
@@ -102,22 +103,27 @@ class PayoutCalculator:
         return filtered_data
 
     def summarize_race_payouts(self, race_num):
+        logging.info(f'Summarizing payouts by race {race_num}')
         payout_by_race = self._parse_out_data(race_num=race_num)
         return payout_by_race.copy()
     
     def summarize_player_payouts(self, player_id):
+        logging.info(f'Summarizing payouts by player ID {player_id}')
         payout_by_player = self._parse_out_data(player_id=player_id)
         return payout_by_player.copy()
     
     def summarize_bettype_payouts(self, bet_type):
+        logging.info(f'Summarizing payouts by bet type {bet_type}')
         payout_by_bettype = self._parse_out_data(bet_type=bet_type)
         return payout_by_bettype.copy()
     
     def summarize_post_payouts(self, post):
+        logging.info(f'Summarizing payouts by post {post}')
         payout_by_post = self._parse_out_data(post=post)
         return payout_by_post.copy()
     
     def get_payouts_between_ids(self, first_payout_id, last_payout_id):
+        logging.debug(f'Pull payouts between IDs {first_payout_id} and {last_payout_id}')
         selected_payouts = []
         with self.lock:
             for i in range(int(first_payout_id), int(last_payout_id)):
@@ -128,11 +134,11 @@ class PayoutCalculator:
         transactions = []
 
         if len(pool_dict.keys()) == 0:
-            print('No pool data for: Race={} | Bet={}'.format(race_num, bet_type))
+            logging.warning('No pool data for: Race={} | Bet={}'.format(race_num, bet_type))
             return transactions
 
         if total_pool == 0:
-            print('Pool total is 0 for Race={} | Bet={}'.format(race_num, bet_type))
+            logging.warning('Pool total is 0 for Race={} | Bet={}'.format(race_num, bet_type))
         
         win_amount = sum([pool_dict.get(str(post), 0) for post in posts])
 
@@ -153,5 +159,3 @@ class PayoutCalculator:
                     race_num, pid, bet_type, wager_post, wager_amount, share
                 )
         return [int(first_payout_id), int(self.next_transaction_id)]
-    
-

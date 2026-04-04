@@ -6,12 +6,14 @@ import threading
 class WagerState:
 
     def __init__(self):
+        logging.info('Initialized WagerState')
         self.all_wagers_unprocessed = []
         self.all_wagers_processed = []
         self.last_processed_row = 0
         self.lock = threading.Lock()
     
     def update(self, new_unp_wagers, new_proc_wagers, total_rows):
+        logging.debug(f'Updating wagers to new total {total_rows}')
         with self.lock:
             self.all_wagers_unprocessed.extend(new_unp_wagers)
             self.all_wagers_processed.extend(new_proc_wagers)
