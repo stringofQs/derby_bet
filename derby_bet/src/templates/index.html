@@ -5,10 +5,37 @@
         <title>Dashboard Title</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="static/js/src.js"></script>
+        <style src="assets/css/style.css"></style>
     </head>
 
     <body>
-        <h1>Dashboard</h1>
-        <div id="main-page"></div>
+        <div id="main-page" class="container">
+            <div id="header">
+                <h1>Derby Wagers Dashboard</h1>
+                <div class="subtitle">Live Betting & Results</div>
+            </div>
+            <div class="dashboard-grid">
+                <div class="panel">
+                    <h2>Player Information</h2>
+                    <div id="players-panel" class="player-list">
+                        <div class="loading">Loading players...</div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h2>Current Race</h2>
+                    <div id="current-race-panel">
+                        <div class="loading">Loading race data...</div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h2>Previous Race Results</h2>
+                    <div id="previous-race-panel">
+                        <div class="loading">Loading previous results...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </body>
 </html>

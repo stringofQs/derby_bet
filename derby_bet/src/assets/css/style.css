@@ -1,0 +1,282 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: #fff;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+h1 {
+    text-align: center;
+    font-size: 3em;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.subtitle {
+    text-align: center;
+    font-size: 1.2em;
+    margin-bottom: 30px;
+    opacity: 0.9;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.panel {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.panel h2 {
+    margin-bottom: 15px;
+    font-size: 1.5em;
+    border-bottom: 2px solid rgba(255,255,255,0.3);
+    padding-bottom: 10px;
+}
+
+/* Players Panel */
+.player-list {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.player-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px;
+    margin-bottom: 8px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    transition: background 0.3s;
+}
+
+.player-item:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.player-name {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.player-balance {
+    font-size: 1.2em;
+    color: #4ade80;
+}
+
+.rank {
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    text-align: center;
+    line-height: 25px;
+    margin-right: 10px;
+    font-size: 0.9em;
+}
+
+/* Current Race Panel */
+.race-info {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.race-number {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #fbbf24;
+}
+
+.race-description {
+    font-size: 1.2em;
+    margin: 10px 0;
+}
+
+.post-time {
+    font-size: 1.1em;
+    color: #a3e635;
+}
+
+.bet-type-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    justify-content: center;
+}
+
+.tab {
+    padding: 10px 20px;
+    background: rgba(255,255,255,0.2);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 1em;
+    transition: all 0.3s;
+}
+
+.tab.active {
+    background: #fbbf24;
+    color: #1e3c72;
+    font-weight: bold;
+}
+
+.horses-list {
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.horse-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 8px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+}
+
+.horse-number {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #fbbf24;
+    width: 40px;
+}
+
+.horse-pool {
+    flex: 1;
+    text-align: center;
+}
+
+.horse-odds {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #4ade80;
+    min-width: 80px;
+    text-align: right;
+}
+
+.pool-bar {
+    height: 6px;
+    background: rgba(251, 191, 36, 0.3);
+    border-radius: 3px;
+    margin-top: 5px;
+    overflow: hidden;
+}
+
+.pool-fill {
+    height: 100%;
+    background: #fbbf24;
+    border-radius: 3px;
+    transition: width 0.5s;
+}
+
+/* Previous Race Panel */
+.results-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.finish-positions {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+.position {
+    text-align: center;
+}
+
+.position-label {
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+.position-horse {
+    font-size: 2em;
+    font-weight: bold;
+    color: #fbbf24;
+}
+
+.payout-summary {
+    background: rgba(255,255,255,0.1);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.top-winners {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.winner-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    margin-bottom: 5px;
+    background: rgba(74, 222, 128, 0.2);
+    border-radius: 5px;
+}
+
+.profit {
+    color: #4ade80;
+    font-weight: bold;
+}
+
+.loading {
+    text-align: center;
+    padding: 40px;
+    font-size: 1.2em;
+}
+
+.no-data {
+    text-align: center;
+    padding: 20px;
+    opacity: 0.7;
+    font-style: italic;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.3);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.5);
+}
