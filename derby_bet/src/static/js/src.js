@@ -4,6 +4,18 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchDashboardData();  // Initialize
 })
 
+function createTd(content) {
+    let td = document.createElement('td');
+    td.appendChild(document.createTextNode(content));
+    return td;
+}
+
+function createTh(content) {
+    let th = document.createElement('th');
+    th.appendChild(document.createTextNode(content));
+    return th
+}
+
 async function fetchDashboardData() {
     try {
         const response = await fetch('/api/dashboard-data');
@@ -30,6 +42,21 @@ function updatePlayersPanel(players) {
     console.log('updatePlayersPanel()')
     console.log(players);
     const panel = document.getElementById('players-panel');
+    panel.innerHTML = '';
+    let table = document.createElement('table');
+    let headerTr = document.createElement('tr');
+    headerTr.appendChild(createTh('Player Name'));
+    headerTr.appendChild(createTh('Available Bids'));
+    table.appendChild(headerTr);
+
+    players.forEach(plyr => {
+        const tr = document.createElement('tr');
+        tr.appendChild(createTd(plyr['player_name']));
+        tr.appendChild(createTd(plyr['bids']['available']))
+        table.appendChild(tr);        
+    });
+
+    panel.appendChild(table);
     return;
 }
 
