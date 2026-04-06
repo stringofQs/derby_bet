@@ -22,7 +22,7 @@ function updateDashboard(dashboardData) {
     if (!dashboardData) return;
 
     updatePlayersPanel(dashboardData.players);
-    updateCurrentRacePanel(dashboardData.current_race);
+    updateCurrentRacePanel(dashboardData.current_race_pool);
     updatePreviousRacePanel(dashboardData.previous_race);
 }
 
@@ -33,14 +33,16 @@ function updatePlayersPanel(players) {
     return;
 }
 
-function updateCurrentRacePanel(currentRace) {
+function updateCurrentRacePanel(currentRacePool) {
     console.log('updateCurrentRacePanel()');
+    console.log(currentRacePool);
     const panel = document.getElementById('current-race-panel');
     return;
 }
 
-function updatePreviousRacePanel(previuosRace) {
+function updatePreviousRacePanel(previousRace) {
     console.log('updatePreviousRacePanel()');
+    console.log(previousRace);
     const panel = document.getElementById('previous-race-panel');
     return;
 }

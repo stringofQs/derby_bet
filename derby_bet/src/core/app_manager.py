@@ -245,6 +245,13 @@ class AppManager:
                         self.player_manager.set_losing_bid(abs(profit), player_id=player_id)
                     else:
                         self.player_manager.set_winning_bid(abs(profit), transaction.get('bid_wagered', 0), player_id=player_id)
+    
+    def get_current_race_odds(self):
+        cur_race = self.race_manager.get_next_race()
+        cur_race_id = int(cur_race.get('race_id', 0))
+
+        cur_race_pool = self.pool_manager.get_pool_info(race_num=str(cur_race_id))
+        return cur_race_pool.copy()
 
 
 app_manager = AppManager()

@@ -30,12 +30,40 @@ def index():
 
 @app.route('/api/dashboard-data')
 def get_dashboard_data():
-    players = app_manager.player_manager.get_all_players_sorted(lastname_alpha=True)
+    msg = []
+    players = None
+    current_race_pool = None
+    previous_race = None
 
-    ret_json = _base_jsonify_return(success=True, message='Successfully fetched data')
+    try:
+        players = app_manager.player_manager.get_all_players_sorted(lastname_alpha=True)
+    except _:
+        msg.append('Error fetching player data from PlayerManager')
+        logging.error('Error fetching player data from PlayerManager', exc_info=True)
+    
+    try:
+        current_race_pool = app_manager.get_current_race_odds()
+    except _:
+        msg.append('Error fetching current race pool data from AppManager (via PoolManager)')
+        logging.error('Error fetching current race pool data from AppManager (via PoolManager)', exc_info=True)
+
+    try:
+        previous_race = app_manager.race_manager.get_previous_race()
+    except _:
+        msg.append('Error fetching previous race data from RaceManager')
+        logging.error('Error fetching prevous race data from RaceManager', exc_info=True)
+    
+
+    success = (len(msg) == 0)
+    if len(msg) > 0:
+        message = '; '.join(msg)
+    else:
+        message = 'Successfully fetched data'
+
+    ret_json = _base_jsonify_return(success=success, message=message)
     ret_json['players'] = players
-    ret_json['current_race'] = None
-    ret_json['previous_race'] = None
+    ret_json['current_race_pool'] = current_race_pool
+    ret_json['previous_race'] = previous_race
     ret_json['timestamp'] = dt.datetime.now().isoformat()
     return jsonify(ret_json)
 

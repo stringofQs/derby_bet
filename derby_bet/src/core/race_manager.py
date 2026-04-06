@@ -131,8 +131,34 @@ class RaceManager:
                 upcoming.append(r_dict)
 
         return upcoming
+
+    def get_next_race(self):
+        with self.lock:
+            all_races = self.races.copy()
+        
+        race_data = None
+        for race in all_races.values():
+            status = race.get('status', 'n/a')
+            if (str(status).lower() == 'next'):
+                race_data = race
+                break
+        
+        return race_data.copy()
     
-    def get_previous_race(self, race_num):
+    def get_previous_race(self):
+        with self.lock:
+            all_races = self.races.copy()
+        
+        all_prev = []
+        for race in all_races.values():
+            status = race.get('status', 'n/a')
+            if (str(status).lower() == 'closed'):
+                all_prev.append(int(race.get('race_id', 0)))
+        
+        race_data = all_races[str(max(all_prev))]  # Gets the latest race ID that is listed "closed"
+        return race_data.copy()
+        
+    def get_previous_race_archive(self, race_num):
         if str(int(race_num) - 1) not in self.races.keys():
             return {}
         
