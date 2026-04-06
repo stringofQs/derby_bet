@@ -5,14 +5,16 @@ import threading
 from flask import Flask, render_template, jsonify, request
 import webbrowser
 
-from derby_bet.utils import log_utils as lu
+from derby_bet.src.utils.log_utils import setup_logger
+from derby_bet.src.core.app_manager import app_manager
 
 # Inputs --------------------------
 LOG_LEVEL = logging.DEBUG
 _PORT = 5050
 
 # Setup ---------------------------
-_LOGGER = lu.setup_logger(__name__, console=True, file=True, filename='log/app.log')
+setup_logger('error_log', level=logging.ERROR, console=True, file=True, filename='error.log')
+setup_logger('debug_log', level=logging.DEBUG, console=False, file=True, filename='debug.log')
 _DEBUG = LOG_LEVEL == logging.DEBUG
 app = Flask(__name__)
 
