@@ -30,7 +30,7 @@ def index():
 
 @app.route('/api/dashboard-data')
 def get_dashboard_data():
-    players = app_manager.player_manager.players.copy()
+    players = app_manager.player_manager.get_all_players_sorted(lastname_alpha=True)
 
     ret_json = _base_jsonify_return(success=True, message='Successfully fetched data')
     ret_json['players'] = players
