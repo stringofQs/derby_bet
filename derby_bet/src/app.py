@@ -16,15 +16,16 @@ _PORT = 5050
 setup_logger('error_log', level=logging.ERROR, console=True, file=True, filename='error.log')
 setup_logger('debug_log', level=logging.DEBUG, console=False, file=True, filename='debug.log')
 _DEBUG = LOG_LEVEL == logging.DEBUG
+
 app = Flask(__name__)
 
 @app.route('/')
 def index():
-    _LOGGER.debug('LOAD: index.html')
+    logging.debug('LOAD: index.html')
     return render_template('index.html')
 
 def open_browser():
-    _LOGGER.debug(f'Opening browser at 127.0.0.1:{_PORT}')
+    logging.debug(f'Opening browser at 127.0.0.1:{_PORT}')
     webbrowser.open_new(f'http://127.0.0.1:{_PORT}')
 
 if __name__ == '__main__':

@@ -1,6 +1,7 @@
 # Imports
 from pathlib import Path
 import threading
+import logging
 
 
 class WagerState:
