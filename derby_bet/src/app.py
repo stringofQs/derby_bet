@@ -37,19 +37,19 @@ def get_dashboard_data():
 
     try:
         players = app_manager.player_manager.get_all_players_sorted(lastname_alpha=True)
-    except _:
+    except Exception as _:
         msg.append('Error fetching player data from PlayerManager')
         logging.error('Error fetching player data from PlayerManager', exc_info=True)
     
     try:
         current_race_pool = app_manager.get_current_race_odds()
-    except _:
+    except Exception as _:
         msg.append('Error fetching current race pool data from AppManager (via PoolManager)')
         logging.error('Error fetching current race pool data from AppManager (via PoolManager)', exc_info=True)
 
     try:
         previous_race = app_manager.race_manager.get_previous_race()
-    except _:
+    except Exception as _:
         msg.append('Error fetching previous race data from RaceManager')
         logging.error('Error fetching prevous race data from RaceManager', exc_info=True)
     

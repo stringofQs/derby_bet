@@ -149,13 +149,14 @@ class RaceManager:
         with self.lock:
             all_races = self.races.copy()
         
+        race_data = {}
         all_prev = []
         for race in all_races.values():
             status = race.get('status', 'n/a')
             if (str(status).lower() == 'closed'):
                 all_prev.append(int(race.get('race_id', 0)))
-        
-        race_data = all_races[str(max(all_prev))]  # Gets the latest race ID that is listed "closed"
+        if len(all_prev) > 0:
+            race_data = all_races[str(max(all_prev))]  # Gets the latest race ID that is listed "closed"
         return race_data.copy()
         
     def get_previous_race_archive(self, race_num):
