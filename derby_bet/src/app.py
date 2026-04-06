@@ -2,6 +2,7 @@
 import logging
 import os
 import threading
+import datetime as dt
 from flask import Flask, render_template, jsonify, request
 import webbrowser
 
@@ -19,10 +20,24 @@ _DEBUG = LOG_LEVEL == logging.DEBUG
 
 app = Flask(__name__)
 
+def _base_jsonify_return(success, message):
+    return {'_success': success, '_message': message}
+
 @app.route('/')
 def index():
     logging.debug('LOAD: index.html')
     return render_template('index.html')
+
+@app.route('/api/dashboard-data')
+def get_dashboard_data():
+    players = app_manager.player_manager.players.copy()
+
+    ret_json = _base_jsonify_return(success=True, message='Successfully fetched data')
+    ret_json['players'] = players
+    ret_json['current_race'] = None
+    ret_json['previous_race'] = None
+    ret_json['timestamp'] = dt.datetime.now().isoformat()
+    return jsonify(ret_json)
 
 def open_browser():
     logging.debug(f'Opening browser at 127.0.0.1:{_PORT}')

@@ -28,6 +28,7 @@ function updateDashboard(dashboardData) {
 
 function updatePlayersPanel(players) {
     console.log('updatePlayersPanel()')
+    console.log(players);
     const panel = document.getElementById('players-panel');
     return;
 }
