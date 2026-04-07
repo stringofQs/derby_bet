@@ -32,6 +32,7 @@ def index():
 def get_dashboard_data():
     msg = []
     players = None
+    current_race = None
     current_race_pool = None
     previous_race = None
 
@@ -41,6 +42,12 @@ def get_dashboard_data():
         msg.append('Error fetching player data from PlayerManager')
         logging.error('Error fetching player data from PlayerManager', exc_info=True)
     
+    try:
+        current_race = app_manager.race_manager.get_next_race()
+    except Exception as _:
+        msg.append('Error fetching current race data from RaceManager')
+        logging.error('Error fetching current race data from RaceManager', exc_info=True)
+
     try:
         current_race_pool = app_manager.get_current_race_odds()
     except Exception as _:
@@ -62,6 +69,7 @@ def get_dashboard_data():
 
     ret_json = _base_jsonify_return(success=success, message=message)
     ret_json['players'] = players
+    ret_json['current_race'] = current_race
     ret_json['current_race_pool'] = current_race_pool
     ret_json['previous_race'] = previous_race
     ret_json['timestamp'] = dt.datetime.now().isoformat()
