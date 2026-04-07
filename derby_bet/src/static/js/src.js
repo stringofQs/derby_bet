@@ -84,18 +84,19 @@ function updateCurrentRacePanel(currentRace) {
     const postTime = new Date(currentRace.post_time);
     const now = new Date();
     const minutesUntil = Math.round((postTime - now) / 60000);
+    const secondsUntil = ((postTime - now) / 1000);
+    // TODO: @PF This is currently going into negative seconds for 30 seconds, then flips to positive
+    const secondsRemaining = Math.round(((secondsUntil / 60) - minutesUntil) * 60);
 
     const raceInfo = createElem('div', 'race-info')
 
     const raceNumber = createElem('div', 'race-number', `Race ${currentRace.race_id}`);
     const raceDescription = createElem('div', 'race-description', currentRace.race_description);
-    const postTimeDiv = createElem('div', 'post-time', `Post time in ${minutesUntil} minutes`);
+    const postTimeDiv = createElem('div', 'post-time', `Post time in ${minutesUntil} min. and ${secondsRemaining} sec.`);
 
     raceInfo.appendChild(raceNumber);
     raceInfo.appendChild(raceDescription);
     raceInfo.appendChild(postTimeDiv);
-
-    // TODO: @PF Need to add current race odds for each post position
 
     panel.appendChild(raceInfo);
 
@@ -117,6 +118,8 @@ function updateCurrentRacePoolPanel(currentRacePool) {
     console.log(currentRacePool);
     const panel = document.getElementById('current-race-pool-panel');
     clearElement(panel);
+
+    // TODO: @PF Need to add current race odds for each post position
 
     return;
 }
