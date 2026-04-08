@@ -83,7 +83,7 @@ function updateCurrentRacePanel(currentRace) {
     
     const postTime = new Date(currentRace.post_time);
     const now = new Date();
-    const minutesUntil = Math.round((postTime - now) / 60000);
+    const minutesUntil = Math.floor((postTime - now) / 60000);
     const secondsUntil = ((postTime - now) / 1000);
     // TODO: @PF This is currently going into negative seconds for 30 seconds, then flips to positive
     const secondsRemaining = Math.round(((secondsUntil / 60) - minutesUntil) * 60);
@@ -122,4 +122,69 @@ function updateCurrentRacePoolPanel(currentRacePool) {
     // TODO: @PF Need to add current race odds for each post position
 
     return;
+}
+
+
+// ============================================================================
+// ADMIN MODAL FUNCTIONALITY
+// ============================================================================
+
+const ADMIN_PASSCODE = '0502'; // Change this to your desired passcode
+
+// Get modal elements
+const adminBtn = document.getElementById('admin-btn');
+const adminModal = document.getElementById('admin-modal');
+const closeModalBtn = document.getElementById('close-modal');
+const closeAdminBtn = document.getElementById('close-admin');
+const submitPasscode = document.getElementById('submit-passcode');
+const passcodeInput = document.getElementById('passcode');
+const passcodeScreen = document.getElementById('passcode-screen');
+const adminPanel = document.getElementById('admin-panel');
+const passcodeError = document.getElementById('passcode-error');
+
+// Open modal
+adminBtn.addEventListener('click', () => {
+    adminModal.classList.add('active');
+    passcodeInput.value = '';
+    passcodeError.textContent = '';
+});
+
+// Close modal
+function closeModal() {
+    adminModal.classList.remove('active');
+    passcodeScreen.style.display = 'block';
+    adminPanel.style.display = 'none';
+    passcodeInput.value = '';
+    passcodeError.textContent = '';
+}
+
+closeModalBtn.addEventListener('click', closeModal);
+closeAdminBtn.addEventListener('click', closeModal);
+
+// Close on outside click
+adminModal.addEventListener('click', (e) => {
+    if (e.target === adminModal) {
+        closeModal();
+    }
+});
+
+// Submit passcode
+submitPasscode.addEventListener('click', checkPasscode);
+passcodeInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        checkPasscode();
+    }
+});
+
+function checkPasscode() {
+    const entered = passcodeInput.value;
+    
+    if (entered === ADMIN_PASSCODE) {
+        passcodeScreen.style.display = 'none';
+        adminPanel.style.display = 'block';
+        passcodeError.textContent = '';
+    } else {
+        passcodeError.textContent = 'Incorrect passcode';
+        passcodeInput.value = '';
+    }
 }

@@ -1,48 +1,195 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Dashboard Title</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script src="static/js/src.js"></script>
-        <style src="assets/css/style.css"></style>
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kentucky Derby Party Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Admin Access Button -->
+    <button class="admin-btn" id="admin-btn" title="Admin Access">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+    </button>
 
-    <body>
-        <div id="main-page" class="container">
-            <div id="header">
-                <h1>Derby Wagers Dashboard</h1>
-                <div class="subtitle">Live Betting & Results</div>
+    <!-- Admin Modal -->
+    <div class="modal" id="admin-modal">
+        <div class="modal-content">
+            <!-- Passcode Screen -->
+            <div class="passcode-screen" id="passcode-screen">
+                <div class="modal-header">
+                    <h2>Admin Access</h2>
+                    <button class="close-btn" id="close-modal">&times;</button>
+                </div>
+                <div class="passcode-input-section">
+                    <label for="passcode">Enter Passcode:</label>
+                    <input type="password" id="passcode" placeholder="••••" maxlength="4">
+                    <button class="submit-btn" id="submit-passcode">Unlock</button>
+                    <div class="passcode-error" id="passcode-error"></div>
+                </div>
             </div>
-            <div class="dashboard-grid">
-                <div class="panel">
-                    <h2>Player Information</h2>
-                    <div id="players-panel" class="player-list">
-                        <div class="loading">Loading players...</div>
+
+            <!-- Admin Panel (hidden until unlocked) -->
+            <div class="admin-panel" id="admin-panel" style="display: none;">
+                <div class="modal-header">
+                    <h2>Admin Panel</h2>
+                    <button class="close-btn" id="close-admin">&times;</button>
+                </div>
+
+                <div class="admin-section">
+                    <h3>🏁 Finalize Race Results</h3>
+                    <div class="admin-form">
+                        <div class="form-row">
+                            <label>Race Number:</label>
+                            <input type="number" id="race-number" min="1" max="14" placeholder="1-14">
+                        </div>
+                        <div class="form-row">
+                            <label>Win (1st):</label>
+                            <input type="number" id="win-horse" min="1" placeholder="Horse #">
+                        </div>
+                        <div class="form-row">
+                            <label>Place (2nd):</label>
+                            <input type="number" id="place-horse" min="1" placeholder="Horse #">
+                        </div>
+                        <div class="form-row">
+                            <label>Show (3rd):</label>
+                            <input type="number" id="show-horse" min="1" placeholder="Horse #">
+                        </div>
+                        <button class="admin-action-btn">Submit Results</button>
                     </div>
                 </div>
 
-                <div class="panel">
-                    <h2>Current Race</h2>
-                    <div id="current-race-panel">
-                        <div class="loading">Loading race data...</div>
+                <div class="admin-section">
+                    <h3>❌ Invalidate Wager</h3>
+                    <div class="admin-form">
+                        <div class="form-row">
+                            <label>Wager ID:</label>
+                            <input type="text" id="wager-id" placeholder="W20250407...">
+                        </div>
+                        <div class="form-row">
+                            <label>Reason:</label>
+                            <input type="text" id="invalidate-reason" placeholder="Reason for invalidation">
+                        </div>
+                        <button class="admin-action-btn danger">Invalidate Wager</button>
                     </div>
                 </div>
 
-                <div class="panel">
-                    <h2 Current Race Pool></h2>
-                    <div id="current-race-pool-panel">
-                        <div class="loading">Loading race pool data...</div>
-                    </div>
-                </div>
-
-                <div class="panel">
-                    <h2>Previous Race Results</h2>
-                    <div id="previous-race-panel">
-                        <div class="loading">Loading previous results...</div>
+                <div class="admin-section">
+                    <h3>💰 Adjust Player Balance</h3>
+                    <div class="admin-form">
+                        <div class="form-row">
+                            <label>Player Name:</label>
+                            <input type="text" id="player-name" placeholder="Player name">
+                        </div>
+                        <div class="form-row">
+                            <label>Amount:</label>
+                            <input type="number" id="adjust-amount" step="0.01" placeholder="± Amount">
+                        </div>
+                        <button class="admin-action-btn">Adjust Balance</button>
                     </div>
                 </div>
             </div>
         </div>
-    </body>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-decoration">
+                <div class="rose-icon">🌹</div>
+            </div>
+            <div class="header-content">
+                <div class="title-container">
+                    <h1 class="main-title">Kentucky Derby</h1>
+                    <div class="subtitle">Run for the Roses</div>
+                </div>
+            </div>
+            <div class="header-decoration">
+                <div class="rose-icon">🌹</div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Grid -->
+        <div class="dashboard-layout">
+            <!-- Left Sidebar: Players -->
+            <aside class="sidebar sidebar-left">
+                <div class="panel players-panel">
+                    <div class="panel-header">
+                        <h2>🏆 Leaderboard</h2>
+                        <div class="panel-accent"></div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="players-panel" class="player-list">
+                            <div class="loading">
+                                <div class="loading-spinner"></div>
+                                <p>Loading players...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Center: Current Race -->
+            <main class="main-content">
+                <!-- Current Race Card -->
+                <div class="panel race-panel">
+                    <div class="panel-header">
+                        <h2>🏇 Current Race</h2>
+                        <div class="panel-accent"></div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="current-race-panel">
+                            <div class="loading">
+                                <div class="loading-spinner"></div>
+                                <p>Loading race data...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Previous Race Results -->
+                <div class="panel results-panel">
+                    <div class="panel-header">
+                        <h2>📊 Previous Race Results</h2>
+                        <div class="panel-accent"></div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="previous-race-panel">
+                            <div class="loading">
+                                <div class="loading-spinner"></div>
+                                <p>Loading results...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Right Sidebar: Race Schedule -->
+            <aside class="sidebar sidebar-right">
+                <div class="panel schedule-panel">
+                    <div class="panel-header">
+                        <h2>📅 Race Schedule</h2>
+                        <div class="panel-accent"></div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="schedule-panel" class="race-schedule">
+                            <div class="loading">
+                                <div class="loading-spinner"></div>
+                                <p>Loading schedule...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/src.js') }}"></script>
+</body>
 </html>
