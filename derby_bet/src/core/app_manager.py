@@ -375,6 +375,8 @@ def start_background_polling():
     logging.info('Background polling started')
 
 
+# start_background_polling()  # Turn off when testing non-API features
+
 if __name__ == '__main__':
     start_background_polling()
     sleep(1200)

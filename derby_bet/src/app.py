@@ -57,6 +57,7 @@ def get_race_info():
     msg = []
     current_race = None
     previous_race = None
+    race_schedule = None
 
     try:
         current_race = app_manager.race_manager.get_next_race()
@@ -69,6 +70,12 @@ def get_race_info():
     except Exception:
         msg.append('Error fetching previous race data')
         logging.error('Error fetching previous race data from RaceManager', exc_info=True)
+    
+    try:
+        race_schedule = app_manager.race_manager.get_upcoming_races(minutes_ahead=50000)
+    except Exception:
+        msg.append('Error fetching race schedule')
+        logging.error('Error fetching race schedule from RaceManager', exc_info=True)
 
     ret_json = _base_jsonify_return(
         success=len(msg) == 0,
@@ -76,6 +83,7 @@ def get_race_info():
     )
     ret_json['current_race'] = current_race
     ret_json['previous_race'] = previous_race
+    ret_json['race_schedule'] = race_schedule
     return jsonify(ret_json)
 
 
@@ -164,11 +172,13 @@ def admin_finalize_race():
 
         current_race = app_manager.race_manager.get_next_race()
         previous_race = app_manager.race_manager.get_race_info(race_num)
+        race_schedule = app_manager.race_manager.get_upcoming_races(minutes_ahead=50000)
 
         _push_sse_event({
             'type': 'race_finalized',
             'current_race': current_race,
-            'previous_race': previous_race
+            'previous_race': previous_race,
+            'race_schedule': race_schedule
         })
 
         return jsonify(_base_jsonify_return(True, f'Race {race_num} finalized successfully'))
