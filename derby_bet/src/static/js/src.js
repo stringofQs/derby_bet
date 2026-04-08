@@ -1,6 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-    console.log('src.js loaded.');
-
     // Fetch race info once on load (countdown runs in JS from there)
     fetchRaceInfo();
 
@@ -44,6 +42,7 @@ async function fetchRaceInfo() {
         if (data._success) {
             updateCurrentRacePanel(data.current_race);
             updatePreviousRacePanel(data.previous_race);
+            updateRaceSchedulePanel(data.race_schedule);
         } else {
             console.error('Backend error fetching race info:', data._message);
         }
@@ -88,6 +87,7 @@ function setupEventSource() {
         if (data.type === 'race_finalized') {
             updateCurrentRacePanel(data.current_race);
             updatePreviousRacePanel(data.previous_race);
+            updateRaceSchedulePanel(data.race_schedule);
         }
     };
 
@@ -204,6 +204,26 @@ function updatePreviousRacePanel(previousRace) {
     });
 
     panel.appendChild(positions);
+}
+
+function updateRaceSchedulePanel(raceSchedule) {
+    const panel = document.getElementById('schedule-panel');
+    clearElement(panel);
+
+    if (!raceSchedule || raceSchedule.length === 0) {
+        panel.appendChild(createElem('div', 'no-data', 'No races scheduled'));
+        return
+    }
+
+    raceSchedule.forEach((rce, index) => {
+        const item = createElem('div', 'schedule-item');
+        const raceNum = createElem('span', null, `Race ${rce.race_id}`);
+        const postTimeVal = new Date(rce.post_time);
+        const postTime = createElem('span', null, postTimeVal.toLocaleTimeString());
+        item.appendChild(raceNum);
+        item.appendChild(postTime);
+        panel.appendChild(item);
+    });
 }
 
 function updateCurrentRacePoolPanel(poolData) {
