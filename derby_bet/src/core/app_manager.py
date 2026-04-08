@@ -9,7 +9,6 @@ import logging
 
 from derby_bet.src.utils import google_api as gapi
 from derby_bet.src.utils.io_tools import find_project_root
-from derby_bet.src.utils.log_utils import setup_logger
 from derby_bet.src.core.data_validation import normalize_wager_fields, normalize_wager_values, normalize_trsc_fields, normalize_trsc_values
 from derby_bet.src.core.transaction_manager import TransactionManager
 from derby_bet.src.core.race_manager import RaceManager
@@ -17,9 +16,6 @@ from derby_bet.src.core.player_manager import PlayerManager
 from derby_bet.src.core.pool_manager import PoolManager
 from derby_bet.src.core.wager_state import WagerState
 from derby_bet.src.core.payout_calculator import PayoutCalculator
-
-setup_logger('error_log', level=logging.ERROR, console=True, file=True, filename='error.log')
-setup_logger('debug_log', level=logging.DEBUG, console=False, file=True, filename='debug.log')
 
 _BASE_DIR = find_project_root()
 _DRB_DIR = Path(_BASE_DIR, 'drb')
@@ -249,6 +245,15 @@ class AppManager:
                         self.player_manager.set_losing_bid(abs(profit), player_id=player_id)
                     else:
                         self.player_manager.set_winning_bid(abs(profit), transaction.get('bid_wagered', 0), player_id=player_id)
+    
+    def get_current_race_odds(self):
+        cur_race = self.race_manager.get_next_race()
+        if not cur_race:
+            return {}
+        cur_race_id = int(cur_race.get('race_id', 0))
+
+        cur_race_pool = self.pool_manager.get_pool_info(race_num=str(cur_race_id))
+        return cur_race_pool.copy()
 
 
 app_manager = AppManager()

@@ -5,6 +5,7 @@ from typing import Optional, Dict, List
 import json
 import threading
 import logging
+import numpy as np
 
 from derby_bet.src.utils.io_tools import find_project_root
 
@@ -92,6 +93,38 @@ class PlayerManager:
             assert str(player_name) in self._map_name_id_dict.keys(), 'Player name received does not exist in the current player data. Received {}'.format(player_name)
             player_id = self._map_name_id_dict.get(str(player_name))
         return player_id
+    
+    def get_all_players_sorted(self, lastname_alpha=False, alphabetically=False, by_avail=False, by_won=False, by_lost=False):
+        assert lastname_alpha or alphabetically or by_avail or by_won or by_lost, 'Expected to get a flag for how to sort all player data, received none'
+
+        with self.lock:
+            players = self.players.copy()
+        
+        plyr_val = []
+        plyr_data = []
+        for plyr in players.values():
+            if alphabetically:
+                plyr_val.append(plyr.get('player_name', ''))
+            elif lastname_alpha:
+                plyr_name = plyr.get('player_name', '')
+                name_split = plyr_name.split(' ')
+                plyr_val.append('{}, {}'.format(name_split[-1], name_split[0]))
+            elif by_avail:
+                plyr_val.append(plyr.get('bids', {}).get('available', 0))
+            elif by_won:
+                plyr_val.append(plyr.get('bids', {}).get('won', 0))
+            elif by_lost:
+                plyr_val.append(plyr.get('bids', {}).get('lost', 0))
+            
+            plyr_data.append(plyr)
+
+        sort_index = np.argsort(plyr_val)
+        if alphabetically or lastname_alpha:  # Want to sort in alphabetical order
+            sorted_players = np.array(plyr_data)[sort_index].tolist()
+        else:  # For any sort by bids (won, available, lost, etc.), we generally want the highest number first, so reverse the order
+            sorted_players = np.array(plyr_data)[sort_index[::-1]].tolist()
+
+        return sorted_players
 
     def is_valid_player(self, player_name=None, player_id=None):
         try:

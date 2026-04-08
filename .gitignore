@@ -6,3 +6,4 @@ drb/wagers/*
 drb/players/*
 drb/pool/*
 drb/transactions/*
+*.log
