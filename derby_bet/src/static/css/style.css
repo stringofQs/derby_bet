@@ -464,7 +464,7 @@ body::before {
     padding-right: 5px;
 }
 
-.player-item {
+.player-item, .schedule-item {
     display: flex;
     justify-content: space-between;
     align-items: center;

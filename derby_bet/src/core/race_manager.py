@@ -121,7 +121,7 @@ class RaceManager:
 
         for r_id in sorted([int(i) for i in list(self.races.keys())]):
             r_dict = self.get_race_info(str(int(r_id)))
-            if str(r_dict['status']).lower() == 'closed':
+            if str(r_dict['status']).lower() in ['closed', 'complete']:
                 continue
 
             post_time = dt.datetime.fromisoformat(r_dict['post_time'])
