@@ -61,7 +61,8 @@
                             <label>Show (3rd):</label>
                             <input type="number" id="show-horse" min="1" placeholder="Horse #">
                         </div>
-                        <button class="admin-action-btn">Submit Results</button>
+                        <button class="admin-action-btn" id="submit-race-results">Submit Results</button>
+                        <div class="admin-feedback" id="finalize-feedback"></div>
                     </div>
                 </div>
 
@@ -148,6 +149,22 @@
                             <div class="loading">
                                 <div class="loading-spinner"></div>
                                 <p>Loading race data...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Current Race Odds -->
+                <div class="panel odds-panel">
+                    <div class="panel-header">
+                        <h2>🎯 Current Race Odds</h2>
+                        <div class="panel-accent"></div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="current-race-pool-panel">
+                            <div class="loading">
+                                <div class="loading-spinner"></div>
+                                <p>Loading odds...</p>
                             </div>
                         </div>
                     </div>

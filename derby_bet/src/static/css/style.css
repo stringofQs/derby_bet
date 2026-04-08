@@ -312,6 +312,20 @@ body::before {
     font-size: 0.9em;
 }
 
+.admin-feedback {
+    margin-top: 10px;
+    font-size: 0.9em;
+    min-height: 1.2em;
+}
+
+.admin-feedback.success {
+    color: var(--mint-julep);
+}
+
+.admin-feedback.error {
+    color: var(--derby-red);
+}
+
 /* Admin Panel */
 .admin-section {
     margin-bottom: 30px;
@@ -513,7 +527,8 @@ body::before {
    RACE PANEL
    ============================================================================ */
 
-.race-panel {
+.race-panel,
+.odds-panel {
     margin-bottom: 20px;
 }
 
