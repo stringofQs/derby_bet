@@ -248,6 +248,8 @@ class AppManager:
     
     def get_current_race_odds(self):
         cur_race = self.race_manager.get_next_race()
+        if not cur_race:
+            return {}
         cur_race_id = int(cur_race.get('race_id', 0))
 
         cur_race_pool = self.pool_manager.get_pool_info(race_num=str(cur_race_id))

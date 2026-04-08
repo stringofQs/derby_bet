@@ -135,29 +135,29 @@ class RaceManager:
     def get_next_race(self):
         with self.lock:
             all_races = self.races.copy()
-        
+
         race_data = None
         for race in all_races.values():
             status = race.get('status', 'n/a')
             if (str(status).lower() == 'next'):
                 race_data = race
                 break
-        
-        return race_data.copy()
+
+        return race_data.copy() if race_data is not None else None
     
     def get_previous_race(self):
         with self.lock:
             all_races = self.races.copy()
-        
-        race_data = {}
+
         all_prev = []
         for race in all_races.values():
-            status = race.get('status', 'n/a')
-            if (str(status).lower() == 'closed'):
+            status = str(race.get('status', 'n/a')).lower()
+            if status in ['closed', 'complete']:
                 all_prev.append(int(race.get('race_id', 0)))
+
         if len(all_prev) > 0:
-            race_data = all_races[str(max(all_prev))]  # Gets the latest race ID that is listed "closed"
-        return race_data.copy()
+            return all_races[str(max(all_prev))].copy()
+        return None
         
     def get_previous_race_archive(self, race_num):
         if str(int(race_num) - 1) not in self.races.keys():
