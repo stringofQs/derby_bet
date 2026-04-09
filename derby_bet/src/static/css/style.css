@@ -87,7 +87,7 @@ body::before {
     justify-content: center;
     gap: 30px;
     margin-bottom: 40px;
-    padding: 30px 40px;
+    padding: 15px 40px;
     background: linear-gradient(135deg, var(--derby-dark-green) 0%, var(--derby-green) 100%);
     border-radius: 20px;
     border: 2px solid var(--derby-gold);
@@ -159,7 +159,7 @@ body::before {
 
 .subtitle {
     font-family: 'Playfair Display', serif;
-    font-size: 1.8em;
+    font-size: 35px;
     font-style: italic;
     color: var(--derby-cream);
     letter-spacing: 3px;
@@ -427,7 +427,7 @@ body::before {
 }
 
 .panel-header {
-    padding: 20px;
+    padding: 12px;
     background: linear-gradient(135deg, rgba(212, 175, 55, 0.2) 0%, rgba(212, 175, 55, 0.1) 100%);
     border-bottom: 2px solid var(--derby-gold);
     position: relative;
@@ -530,36 +530,36 @@ body::before {
 
 .race-panel,
 .odds-panel {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .race-info {
     text-align: center;
-    padding: 30px 20px;
+    padding: 20px 15px;
     background: linear-gradient(135deg, rgba(200, 16, 46, 0.2) 0%, rgba(212, 175, 55, 0.2) 100%);
     border-radius: 10px;
-    margin-bottom: 25px;
+    margin-bottom: 10px;
 }
 
 .race-number {
     font-family: 'Cinzel', serif;
-    font-size: 3em;
-    font-weight: 900;
+    font-size: 50px;
+    font-weight: 600;
     color: var(--derby-gold);
     text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
     margin-bottom: 10px;
 }
 
 .race-description {
-    font-size: 1.3em;
+    font-size: 25px;
     color: var(--text-primary);
     margin-bottom: 15px;
 }
 
 .post-time {
-    font-size: 1.4em;
+    font-size: 1.6em;
     color: var(--mint-julep);
-    font-weight: 600;
+    font-weight: 400;
     padding: 10px 20px;
     background: rgba(0, 0, 0, 0.3);
     border-radius: 20px;
@@ -605,74 +605,90 @@ body::before {
     box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
 }
 
-/* Horses List */
-.horses-list {
-    max-height: 500px;
-    overflow-y: auto;
-    padding-right: 5px;
+/* Odds Panel — three-column pool grid */
+.pools-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
 }
 
-.horse-item {
+.pool-column {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pool-column-header {
+    font-family: 'Cinzel', serif;
+    font-size: 25px;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding: 2px 0;
+    margin-bottom: 2px;
+    border-bottom: 2px solid var(--border-color);
+    color: var(--derby-gold);
+}
+
+/* Horse rows within each pool column */
+.horse-row {
     display: flex;
     align-items: center;
-    gap: 15px;
-    padding: 15px;
-    margin-bottom: 12px;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 10px;
-    border: 2px solid transparent;
-    transition: all 0.3s ease;
+    gap: 20px;
+    padding: 4px 6px;
+    border-radius: 6px;
+    transition: background 0.2s ease;
 }
 
-.horse-item:hover {
+.horse-row:hover {
     background: rgba(212, 175, 55, 0.1);
-    border-color: var(--derby-gold);
-    transform: scale(1.02);
 }
 
-.horse-number {
-    font-size: 1.8em;
-    font-weight: 900;
+.horse-row-number {
+    font-size: 30px;
+    font-weight: 700;
     color: var(--derby-gold);
-    min-width: 50px;
+    min-width: 70px;
     text-align: center;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-.horse-pool {
-    flex: 1;
-}
-
-.pool-amount {
-    font-size: 1.1em;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 8px;
 }
 
 .pool-bar {
-    height: 8px;
-    background: rgba(212, 175, 55, 0.2);
-    border-radius: 4px;
+    flex: 1;
+    height: 10px;
+    background: rgba(212, 175, 55, 0.15);
+    border-radius: 3px;
     overflow: hidden;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .pool-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--derby-gold) 0%, var(--derby-cream) 100%);
-    border-radius: 4px;
+    border-radius: 3px;
     transition: width 0.5s ease;
-    box-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
 }
 
-.horse-odds {
-    font-size: 1.5em;
-    font-weight: 700;
-    color: var(--mint-julep);
-    min-width: 100px;
+.pool-fill-win {
+    background: linear-gradient(90deg, var(--derby-gold) 0%, #FFE066 100%);
+    box-shadow: 0 0 6px rgba(212, 175, 55, 0.6);
+}
+
+.pool-fill-place {
+    background: linear-gradient(90deg, #A0A0C0 0%, #C8C8E8 100%);
+    box-shadow: 0 0 6px rgba(192, 192, 220, 0.5);
+}
+
+.pool-fill-show {
+    background: linear-gradient(90deg, var(--bourbon) 0%, #D4956A 100%);
+    box-shadow: 0 0 6px rgba(184, 115, 51, 0.5);
+}
+
+.horse-row-amount {
+    font-size: 25px;
+    font-weight: 500;
+    min-width: 70px;
     text-align: right;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    color: var(--derby-cream);
 }
 
 /* ============================================================================

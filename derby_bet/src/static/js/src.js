@@ -215,7 +215,7 @@ function updateRaceSchedulePanel(raceSchedule) {
         return
     }
 
-    raceSchedule.forEach((rce, index) => {
+    raceSchedule.forEach((rce) => {
         const item = createElem('div', 'schedule-item');
         const raceNum = createElem('span', null, `Race ${rce.race_id}`);
         const postTimeVal = new Date(rce.post_time);
@@ -230,65 +230,43 @@ function updateCurrentRacePoolPanel(poolData) {
     const panel = document.getElementById('current-race-pool-panel');
     clearElement(panel);
 
-    if (!poolData || Object.keys(poolData).length === 0) {
-        panel.appendChild(createElem('div', 'no-data', 'No bids placed yet'));
-        return;
-    }
+    const pools = poolData || {};
 
-    // Collect all post positions that appear in any pool
-    const allPosts = new Set();
-    ['win', 'place', 'show'].forEach(type => {
-        if (poolData[type]) Object.keys(poolData[type]).forEach(p => allPosts.add(p));
-    });
-    const posts = Array.from(allPosts).sort((a, b) => parseInt(a) - parseInt(b));
+    const columnDefs = [
+        { label: 'Win',   key: 'win',   fillClass: 'pool-fill-win' },
+        { label: 'Place', key: 'place', fillClass: 'pool-fill-place' },
+        { label: 'Show',  key: 'show',  fillClass: 'pool-fill-show' },
+    ];
 
-    if (posts.length === 0) {
-        panel.appendChild(createElem('div', 'no-data', 'No bids placed yet'));
-        return;
-    }
+    const grid = createElem('div', 'pools-grid');
 
-    const winTotal = posts.reduce((s, p) => s + (poolData.win?.[p] || 0), 0);
+    columnDefs.forEach(({ label, key, fillClass }) => {
+        const poolMap = pools[key] || {};
+        const total   = Object.values(poolMap).reduce((s, v) => s + v, 0);
 
-    const list = createElem('div', 'horses-list');
+        const col = createElem('div', 'pool-column');
+        col.appendChild(createElem('div', 'pool-column-header', label));
 
-    posts.forEach(post => {
-        const winBids   = poolData.win?.[post]   || 0;
-        const placeBids = poolData.place?.[post] || 0;
-        const showBids  = poolData.show?.[post]  || 0;
+        for (let post = 1; post <= 20; post++) {
+            const amount = poolMap[String(post)] || 0;
 
-        // Skip posts with no bids at all
-        if (winBids === 0 && placeBids === 0 && showBids === 0) return;
+            const row = createElem('div', 'horse-row');
+            row.appendChild(createElem('span', 'horse-row-number', `#${post}`));
 
-        const item = createElem('div', 'horse-item');
+            const bar  = createElem('div', 'pool-bar');
+            const fill = createElem('div', `pool-fill ${fillClass}`);
+            fill.style.width = total > 0 ? `${Math.round(amount / total * 100)}%` : '0%';
+            bar.appendChild(fill);
+            row.appendChild(bar);
 
-        item.appendChild(createElem('div', 'horse-number', `#${post}`));
+            row.appendChild(createElem('span', 'horse-row-amount', amount > 0 ? `$${amount}` : ''));
+            col.appendChild(row);
+        }
 
-        const poolDiv = createElem('div', 'horse-pool');
-
-        // Pool amounts text: W / P / S
-        poolDiv.appendChild(createElem('div', 'pool-amount', `W: ${winBids}  P: ${placeBids}  S: ${showBids}`));
-
-        // Bar width driven by share of win pool (or whichever pool has the most total)
-        const winShare  = winTotal  > 0 ? winBids  / winTotal  : 0;
-        const barWidth  = Math.round(winShare * 100);
-        const poolBar   = createElem('div', 'pool-bar');
-        const poolFill  = createElem('div', 'pool-fill');
-        poolFill.style.width = `${barWidth}%`;
-        poolBar.appendChild(poolFill);
-        poolDiv.appendChild(poolBar);
-
-        item.appendChild(poolDiv);
-
-        // Win payout multiplier: total pool / bids on this horse
-        const winOdds = (winBids > 0 && winTotal > 0)
-            ? `${(winTotal / winBids).toFixed(1)}x`
-            : '—';
-        item.appendChild(createElem('div', 'horse-odds', winOdds));
-
-        list.appendChild(item);
+        grid.appendChild(col);
     });
 
-    panel.appendChild(list);
+    panel.appendChild(grid);
 }
 
 
