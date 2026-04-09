@@ -81,10 +81,11 @@ body {
 .header-decoration {
     position: relative;
     z-index: 2;
+    margin: 0px 20px;
 }
 
 .rose-icon {
-    font-size: 4em;
+    font-size: 6.0em;
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
     animation: gentle-sway 3s ease-in-out infinite;
 }
@@ -114,12 +115,12 @@ body {
     text-shadow: 
         3px 3px 6px rgba(0, 0, 0, 0.8),
         0 0 30px rgba(212, 175, 55, 0.5);
-    margin-bottom: 10px;
+    margin-bottom: 2px;
 }
 
 .subtitle {
     font-family: 'Playfair Display', serif;
-    font-size: 35px;
+    font-size: 40px;
     font-style: italic;
     color: var(--derby-cream);
     letter-spacing: 3px;
@@ -132,10 +133,10 @@ body {
 
 .admin-btn {
     position: fixed;
-    top: 20px;
-    right: 20px;
-    width: 60px;
-    height: 60px;
+    top: 75px;
+    right: 100px;
+    width: 75px;
+    height: 75px;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--derby-brown) 0%, var(--bourbon) 100%);
     border: 2px solid var(--derby-gold);
@@ -186,9 +187,9 @@ body {
     border: 3px solid var(--derby-gold);
     border-radius: 20px;
     padding: 40px;
-    max-width: 600px;
+    max-width: 1050px;
     width: 90%;
-    max-height: 80vh;
+    max-height: 200vh;
     overflow-y: auto;
     box-shadow: var(--shadow-lg);
     position: relative;
@@ -205,7 +206,7 @@ body {
 
 .modal-header h2 {
     font-family: 'Cinzel', serif;
-    font-size: 2em;
+    font-size: 2.8em;
     color: var(--derby-gold);
 }
 
@@ -213,7 +214,7 @@ body {
     background: none;
     border: none;
     color: var(--derby-gold);
-    font-size: 2.5em;
+    font-size: 3.0em;
     cursor: pointer;
     line-height: 1;
     transition: all 0.3s;
@@ -232,7 +233,7 @@ body {
 
 .passcode-input-section label {
     display: block;
-    font-size: 1.2em;
+    font-size: 1.8em;
     margin-bottom: 15px;
     color: var(--derby-cream);
 }
@@ -240,7 +241,7 @@ body {
 .passcode-input-section input {
     width: 200px;
     padding: 15px;
-    font-size: 1.5em;
+    font-size: 2.0em;
     text-align: center;
     background: rgba(0, 0, 0, 0.3);
     border: 2px solid var(--derby-gold);
@@ -251,7 +252,7 @@ body {
 
 .submit-btn {
     padding: 12px 40px;
-    font-size: 1.1em;
+    font-size: 2.0em;
     background: var(--derby-gold);
     color: var(--derby-dark-green);
     border: none;
@@ -259,6 +260,7 @@ body {
     cursor: pointer;
     font-weight: 600;
     transition: all 0.3s;
+    margin-left: 20px;
 }
 
 .submit-btn:hover {
@@ -270,7 +272,7 @@ body {
 .passcode-error {
     color: var(--derby-red);
     margin-top: 15px;
-    font-size: 0.9em;
+    font-size: 1.8em;
 }
 
 .admin-feedback {
@@ -300,7 +302,7 @@ body {
     font-family: 'Cinzel', serif;
     color: var(--derby-gold);
     margin-bottom: 15px;
-    font-size: 1.3em;
+    font-size: 1.8em;
 }
 
 .admin-form {
@@ -316,7 +318,7 @@ body {
 }
 
 .form-row label {
-    font-size: 0.9em;
+    font-size: 1.3em;
     color: var(--derby-cream);
     font-weight: 600;
 }
@@ -327,7 +329,7 @@ body {
     border: 1px solid var(--border-color);
     border-radius: 5px;
     color: var(--text-primary);
-    font-size: 1em;
+    font-size: 1.5em;
 }
 
 .admin-action-btn {
@@ -336,7 +338,7 @@ body {
     color: var(--derby-dark-green);
     border: none;
     border-radius: 8px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.3s;
     margin-top: 10px;
