@@ -166,8 +166,13 @@ function updateCurrentRacePanel(currentRace) {
     }
 
     const raceInfo = createElem('div', 'race-info');
-    raceInfo.appendChild(createElem('div', 'race-number', `Race ${currentRace.race_id}`));
-    raceInfo.appendChild(createElem('div', 'race-description', currentRace.race_description));
+
+    const raceLabel = createElem('div', 'race-label');
+    raceLabel.appendChild(createElem('span', 'race-number', `(Race ${currentRace.race_id})`));
+    raceLabel.appendChild(createElem('span', 'race-label-sep', ' '));
+    raceLabel.appendChild(createElem('span', 'race-description', currentRace.race_description));
+    raceInfo.appendChild(raceLabel);
+
     raceInfo.appendChild(createElem('div', 'post-time', ''));
     panel.appendChild(raceInfo);
 
@@ -184,7 +189,6 @@ function updatePreviousRacePanel(previousRace) {
     }
 
     const header = createElem('div', 'results-header');
-    header.appendChild(createElem('div', 'race-number', `Race ${previousRace.race_id}`));
     header.appendChild(createElem('div', 'race-description', previousRace.race_description));
     panel.appendChild(header);
 
@@ -245,7 +249,10 @@ function updateCurrentRacePoolPanel(poolData) {
         const total   = Object.values(poolMap).reduce((s, v) => s + v, 0);
 
         const col = createElem('div', 'pool-column');
-        col.appendChild(createElem('div', 'pool-column-header', label));
+
+        const header = createElem('div', 'pool-column-header', label);
+        header.appendChild(createElem('div', 'pool-column-total', total > 0 ? `${total} bids` : 'no bids'));
+        col.appendChild(header);
 
         for (let post = 1; post <= 20; post++) {
             const amount = poolMap[String(post)] || 0;
@@ -259,7 +266,13 @@ function updateCurrentRacePoolPanel(poolData) {
             bar.appendChild(fill);
             row.appendChild(bar);
 
-            row.appendChild(createElem('span', 'horse-row-amount', amount > 0 ? `$${amount}` : ''));
+            // Multiplier: total pool / bids on this post.
+            // For win this is exact; for place/show it is the upper-bound since
+            // the pool is shared among the top 2 or top 3 finishers.
+            const multiplier = (amount > 0 && total > 0)
+                ? `${(total / amount).toFixed(1)}x`
+                : '—';
+            row.appendChild(createElem('span', 'horse-row-amount', multiplier));
             col.appendChild(row);
         }
 

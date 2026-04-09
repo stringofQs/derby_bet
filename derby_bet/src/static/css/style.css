@@ -49,25 +49,6 @@ body {
     zoom: 50%;
 }
 
-/* Decorative Background Pattern */
-body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: 
-        repeating-linear-gradient(
-            45deg,
-            transparent,
-            transparent 100px,
-            rgba(212, 175, 55, 0.02) 100px,
-            rgba(212, 175, 55, 0.02) 200px
-        );
-    pointer-events: none;
-    z-index: 0;
-}
 
 .container {
     max-width: 3800px;
@@ -96,27 +77,6 @@ body::before {
     overflow: hidden;
 }
 
-.dashboard-header::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: repeating-linear-gradient(
-        45deg,
-        transparent,
-        transparent 20px,
-        rgba(212, 175, 55, 0.05) 20px,
-        rgba(212, 175, 55, 0.05) 40px
-    );
-    animation: slide 20s linear infinite;
-}
-
-@keyframes slide {
-    0% { transform: translate(0, 0); }
-    100% { transform: translate(50px, 50px); }
-}
 
 .header-decoration {
     position: relative;
@@ -459,6 +419,10 @@ body::before {
    PLAYERS PANEL
    ============================================================================ */
 
+.players-leaderboard {
+    margin-bottom: 25px;
+}
+
 .player-list {
     max-height: calc(100vh - 400px);
     overflow-y: auto;
@@ -534,26 +498,47 @@ body::before {
 }
 
 .race-info {
-    text-align: center;
-    padding: 20px 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 15px 20px;
     background: linear-gradient(135deg, rgba(200, 16, 46, 0.2) 0%, rgba(212, 175, 55, 0.2) 100%);
     border-radius: 10px;
-    margin-bottom: 10px;
+}
+
+.race-label {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    min-width: 0;
 }
 
 .race-number {
+    font-size: 40px;
+    color: var(--text-primary);
+    white-space: nowrap;
+    flex-shrink: 0;
+    align-content: center;
+}
+
+.race-label-sep {
+    font-size: 25px;
+    color: var(--text-primary);
+    flex-shrink: 0;
+    margin-right: 10px;
+}
+
+.race-description {
     font-family: 'Cinzel', serif;
     font-size: 50px;
     font-weight: 600;
     color: var(--derby-gold);
     text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-    margin-bottom: 10px;
-}
-
-.race-description {
-    font-size: 25px;
-    color: var(--text-primary);
-    margin-bottom: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    align-content: center;
 }
 
 .post-time {
@@ -563,7 +548,8 @@ body::before {
     padding: 10px 20px;
     background: rgba(0, 0, 0, 0.3);
     border-radius: 20px;
-    display: inline-block;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .countdown {
@@ -625,10 +611,21 @@ body::before {
     text-align: center;
     text-transform: uppercase;
     letter-spacing: 2px;
-    padding: 2px 0;
+    padding: 2px 0 6px;
     margin-bottom: 2px;
     border-bottom: 2px solid var(--border-color);
     color: var(--derby-gold);
+}
+
+.pool-column-total {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--derby-cream);
+    opacity: 0.7;
+    margin-top: 2px;
 }
 
 /* Horse rows within each pool column */
@@ -697,7 +694,7 @@ body::before {
 
 .results-header {
     text-align: center;
-    margin-bottom: 25px;
+    margin-bottom: 15px;
 }
 
 .finish-positions {
@@ -811,7 +808,7 @@ body::before {
    ============================================================================ */
 
 .race-schedule {
-    max-height: calc(100vh - 400px);
+    max-height: 300px;
     overflow-y: auto;
 }
 
@@ -913,10 +910,11 @@ body::before {
 
 .no-data {
     text-align: center;
-    padding: 40px 20px;
+    padding: 30px 20px;
     color: var(--derby-cream);
     font-style: italic;
     opacity: 0.7;
+    font-size: 25px;
 }
 
 /* ============================================================================
