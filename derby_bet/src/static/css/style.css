@@ -426,8 +426,7 @@ body {
 }
 
 .player-list {
-    max-height: calc(100vh - 400px);
-    overflow-y: auto;
+    height: 345px;
     padding-right: 5px;
 }
 
@@ -441,6 +440,9 @@ body {
     border-radius: 10px;
     border-left: 4px solid var(--derby-gold);
     transition: all 0.3s ease;
+    color: var(--derby-cream);
+    font-size: 25px;
+    font-weight: 700;
 }
 
 .player-item:hover {
@@ -810,8 +812,7 @@ body {
    ============================================================================ */
 
 .race-schedule {
-    max-height: 300px;
-    overflow-y: auto;
+    height: 345px;
 }
 
 .schedule-item {
