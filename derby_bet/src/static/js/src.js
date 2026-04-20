@@ -166,8 +166,13 @@ function updateCurrentRacePanel(currentRace) {
     }
 
     const raceInfo = createElem('div', 'race-info');
-    raceInfo.appendChild(createElem('div', 'race-number', `Race ${currentRace.race_id}`));
-    raceInfo.appendChild(createElem('div', 'race-description', currentRace.race_description));
+
+    const raceLabel = createElem('div', 'race-label');
+    raceLabel.appendChild(createElem('span', 'race-number', `(Race ${currentRace.race_id})`));
+    raceLabel.appendChild(createElem('span', 'race-label-sep', ' '));
+    raceLabel.appendChild(createElem('span', 'race-description', currentRace.race_description));
+    raceInfo.appendChild(raceLabel);
+
     raceInfo.appendChild(createElem('div', 'post-time', ''));
     panel.appendChild(raceInfo);
 
@@ -184,7 +189,6 @@ function updatePreviousRacePanel(previousRace) {
     }
 
     const header = createElem('div', 'results-header');
-    header.appendChild(createElem('div', 'race-number', `Race ${previousRace.race_id}`));
     header.appendChild(createElem('div', 'race-description', previousRace.race_description));
     panel.appendChild(header);
 
@@ -215,7 +219,7 @@ function updateRaceSchedulePanel(raceSchedule) {
         return
     }
 
-    raceSchedule.forEach((rce, index) => {
+    raceSchedule.forEach((rce) => {
         const item = createElem('div', 'schedule-item');
         const raceNum = createElem('span', null, `Race ${rce.race_id}`);
         const postTimeVal = new Date(rce.post_time);
@@ -230,65 +234,52 @@ function updateCurrentRacePoolPanel(poolData) {
     const panel = document.getElementById('current-race-pool-panel');
     clearElement(panel);
 
-    if (!poolData || Object.keys(poolData).length === 0) {
-        panel.appendChild(createElem('div', 'no-data', 'No bids placed yet'));
-        return;
-    }
+    const pools = poolData || {};
 
-    // Collect all post positions that appear in any pool
-    const allPosts = new Set();
-    ['win', 'place', 'show'].forEach(type => {
-        if (poolData[type]) Object.keys(poolData[type]).forEach(p => allPosts.add(p));
-    });
-    const posts = Array.from(allPosts).sort((a, b) => parseInt(a) - parseInt(b));
+    const columnDefs = [
+        { label: 'Win',   key: 'win',   fillClass: 'pool-fill-win' },
+        { label: 'Place', key: 'place', fillClass: 'pool-fill-place' },
+        { label: 'Show',  key: 'show',  fillClass: 'pool-fill-show' },
+    ];
 
-    if (posts.length === 0) {
-        panel.appendChild(createElem('div', 'no-data', 'No bids placed yet'));
-        return;
-    }
+    const grid = createElem('div', 'pools-grid');
 
-    const winTotal = posts.reduce((s, p) => s + (poolData.win?.[p] || 0), 0);
+    columnDefs.forEach(({ label, key, fillClass }) => {
+        const poolMap = pools[key] || {};
+        const total   = Object.values(poolMap).reduce((s, v) => s + v, 0);
 
-    const list = createElem('div', 'horses-list');
+        const col = createElem('div', 'pool-column');
 
-    posts.forEach(post => {
-        const winBids   = poolData.win?.[post]   || 0;
-        const placeBids = poolData.place?.[post] || 0;
-        const showBids  = poolData.show?.[post]  || 0;
+        const header = createElem('div', 'pool-column-header', label);
+        header.appendChild(createElem('div', 'pool-column-total', total > 0 ? `${total} bids` : 'no bids'));
+        col.appendChild(header);
 
-        // Skip posts with no bids at all
-        if (winBids === 0 && placeBids === 0 && showBids === 0) return;
+        for (let post = 1; post <= 20; post++) {
+            const amount = poolMap[String(post)] || 0;
 
-        const item = createElem('div', 'horse-item');
+            const row = createElem('div', 'horse-row');
+            row.appendChild(createElem('span', 'horse-row-number', `#${post}`));
 
-        item.appendChild(createElem('div', 'horse-number', `#${post}`));
+            const bar  = createElem('div', 'pool-bar');
+            const fill = createElem('div', `pool-fill ${fillClass}`);
+            fill.style.width = total > 0 ? `${Math.round(amount / total * 100)}%` : '0%';
+            bar.appendChild(fill);
+            row.appendChild(bar);
 
-        const poolDiv = createElem('div', 'horse-pool');
+            // Multiplier: total pool / bids on this post.
+            // For win this is exact; for place/show it is the upper-bound since
+            // the pool is shared among the top 2 or top 3 finishers.
+            const multiplier = (amount > 0 && total > 0)
+                ? `${(total / amount).toFixed(1)}x`
+                : '—';
+            row.appendChild(createElem('span', 'horse-row-amount', multiplier));
+            col.appendChild(row);
+        }
 
-        // Pool amounts text: W / P / S
-        poolDiv.appendChild(createElem('div', 'pool-amount', `W: ${winBids}  P: ${placeBids}  S: ${showBids}`));
-
-        // Bar width driven by share of win pool (or whichever pool has the most total)
-        const winShare  = winTotal  > 0 ? winBids  / winTotal  : 0;
-        const barWidth  = Math.round(winShare * 100);
-        const poolBar   = createElem('div', 'pool-bar');
-        const poolFill  = createElem('div', 'pool-fill');
-        poolFill.style.width = `${barWidth}%`;
-        poolBar.appendChild(poolFill);
-        poolDiv.appendChild(poolBar);
-
-        item.appendChild(poolDiv);
-
-        // Win payout multiplier: total pool / bids on this horse
-        const winOdds = (winBids > 0 && winTotal > 0)
-            ? `${(winTotal / winBids).toFixed(1)}x`
-            : '—';
-        item.appendChild(createElem('div', 'horse-odds', winOdds));
-
-        list.appendChild(item);
+        grid.appendChild(col);
     });
 
-    panel.appendChild(list);
+    panel.appendChild(grid);
 }
 
 

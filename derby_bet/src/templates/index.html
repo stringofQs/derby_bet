@@ -120,7 +120,7 @@
         <div class="dashboard-layout">
             <!-- Left Sidebar: Players -->
             <aside class="sidebar sidebar-left">
-                <div class="panel players-panel">
+                <div class="panel players-leaderboard">
                     <div class="panel-header">
                         <h2>🏆 Leaderboard</h2>
                         <div class="panel-accent"></div>
@@ -134,14 +134,28 @@
                         </div>
                     </div>
                 </div>
+                <div class="panel available-bids-panel">
+                    <div class="panel-header">
+                        <h2>Player Bids Available</h2>
+                        <div class="panel-accent"></div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="players-available-panel" class="player-list">
+                            <div class="loading">
+                                <div class="loading-spinner"></div>
+                                <p>Loading bids available...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </aside>
 
             <!-- Center: Current Race -->
             <main class="main-content">
-                <!-- Current Race Card -->
-                <div class="panel race-panel">
+                <!-- Current Race Info + Odds -->
+                <div class="panel odds-panel">
                     <div class="panel-header">
-                        <h2>🏇 Current Race</h2>
+                        <h2>Current Race</h2>
                         <div class="panel-accent"></div>
                     </div>
                     <div class="panel-body">
@@ -151,16 +165,6 @@
                                 <p>Loading race data...</p>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Current Race Odds -->
-                <div class="panel odds-panel">
-                    <div class="panel-header">
-                        <h2>🎯 Current Race Odds</h2>
-                        <div class="panel-accent"></div>
-                    </div>
-                    <div class="panel-body">
                         <div id="current-race-pool-panel">
                             <div class="loading">
                                 <div class="loading-spinner"></div>
@@ -191,7 +195,7 @@
             <aside class="sidebar sidebar-right">
                 <div class="panel schedule-panel">
                     <div class="panel-header">
-                        <h2>📅 Race Schedule</h2>
+                        <h2>Upcoming Races</h2>
                         <div class="panel-accent"></div>
                     </div>
                     <div class="panel-body">
@@ -199,6 +203,20 @@
                             <div class="loading">
                                 <div class="loading-spinner"></div>
                                 <p>Loading schedule...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel issue-log-panel">
+                    <div class="panel-header">
+                        <h2></h2>
+                        <div class="panel-accent"></div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="players-available-panel" class="player-list">
+                            <div class="loading">
+                                <div class="loading-spinner"></div>
+                                <p>Loading bids available...</p>
                             </div>
                         </div>
                     </div>

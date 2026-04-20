@@ -194,10 +194,10 @@ def admin_finalize_race():
 # ============================================================================
 
 def open_browser():
-    logging.debug(f'Opening browser at 127.0.0.1:{_PORT}')
-    webbrowser.open_new(f'http://127.0.0.1:{_PORT}')
+    logging.debug(f'Opening browser at 0.0.0.0:{_PORT}')
+    webbrowser.open_new(f'http://0.0.0.0:{_PORT}')
 
 if __name__ == '__main__':
     if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
         threading.Timer(1.0, open_browser).start()
-    app.run(port=_PORT, debug=_DEBUG)
+    app.run(host='0.0.0.0', port=_PORT, debug=_DEBUG)
