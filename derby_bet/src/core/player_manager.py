@@ -126,6 +126,13 @@ class PlayerManager:
 
         return sorted_players
 
+    def get_lead_players(self, top_n):
+        assert isinstance(top_n, int) and (top_n > 0), 'Invalid top_n value received: {}'.format(top_n)
+        all_players_sorted = self.get_all_players_sorted(by_won=True)
+        if len(all_players_sorted) < top_n:
+            top_n = len(all_players_sorted)
+        return all_players_sorted[:top_n]
+            
     def is_valid_player(self, player_name=None, player_id=None):
         try:
             _ = self.get_player_info(player_name=player_name, player_id=player_id)

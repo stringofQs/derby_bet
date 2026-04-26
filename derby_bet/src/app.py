@@ -92,13 +92,16 @@ def get_players():
     """Returns all players with their available bid counts. Polled frequently."""
     try:
         players = app_manager.player_manager.get_all_players_sorted(lastname_alpha=True)
+        lead_players = app_manager.player_manager.get_lead_players(top_n=5)
         ret_json = _base_jsonify_return(success=True, message='OK')
-        ret_json['players'] = players
+        ret_json['all_players'] = players
+        ret_json['lead_players'] = lead_players
         return jsonify(ret_json)
     except Exception:
         logging.error('Error fetching player data from PlayerManager', exc_info=True)
         ret_json = _base_jsonify_return(success=False, message='Error fetching player data')
-        ret_json['players'] = []
+        ret_json['all_players'] = []
+        ret_json['lead_players'] = []
         return jsonify(ret_json), 500
 
 
