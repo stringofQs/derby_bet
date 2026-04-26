@@ -1,7 +1,6 @@
 # Imports
 from pathlib import Path
 import datetime as dt
-from typing import Optional, Dict, List
 import json
 import threading
 import logging
