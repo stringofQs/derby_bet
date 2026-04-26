@@ -43,7 +43,7 @@
                 </div>
 
                 <div class="admin-section">
-                    <h3>🏁 Finalize Race Results</h3>
+                    <h3>Finalize Race Results</h3>
                     <div class="admin-form">
                         <div class="form-row">
                             <label>Race Number:</label>
@@ -67,7 +67,7 @@
                 </div>
 
                 <div class="admin-section">
-                    <h3>❌ Invalidate Wager</h3>
+                    <h3>Invalidate Wager</h3>
                     <div class="admin-form">
                         <div class="form-row">
                             <label>Wager ID:</label>
@@ -82,7 +82,7 @@
                 </div>
 
                 <div class="admin-section">
-                    <h3>💰 Adjust Player Balance</h3>
+                    <h3>Adjust Player Balance</h3>
                     <div class="admin-form">
                         <div class="form-row">
                             <label>Player Name:</label>
@@ -93,6 +93,18 @@
                             <input type="number" id="adjust-amount" step="0.01" placeholder="± Amount">
                         </div>
                         <button class="admin-action-btn">Adjust Balance</button>
+                    </div>
+                </div>
+
+                <div class="admin-section">
+                    <h3>Add New Player</h3>
+                    <div class="admin-form">
+                        <div class="form-row">
+                            <label>New Player Name:</label>
+                            <input type="text" id="new-player-name" placeholder="New player name">
+                        </div>
+                        <button class="admin-action-btn" id="add-new-player">Add</button>
+                        <div class="admin-feedback" id="new-player-feedback"></div>
                     </div>
                 </div>
             </div>

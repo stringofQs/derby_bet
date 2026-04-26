@@ -396,3 +396,35 @@ document.getElementById('submit-race-results').addEventListener('click', () => {
         console.error('Error finalizing race:', err);
     });
 });
+
+document.getElementById('add-new-player').addEventListener('click', () => {
+    const feedbackEl = document.getElementById('new-player-feedback');
+    feedbackEl.className = 'admin-feedback';
+    feedbackEl.textContent = '';
+
+    const playerName = document.getElementById('new-player-name').value;
+
+    if (!playerName || playerName.length === 0) {
+        feedbackEl.className = 'admin-feedback error'
+        feedbackEl.textContent = 'Please fill in player name field.';
+        return;
+    }
+
+    fetch('/api/admin/add-player', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            player_name: playerName
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        feedbackEl.className = data._success ? 'admin-feedback success' : 'admin-feedback error';
+        feedbackEl.textContent = data._message;
+    })
+    .catch(err => {
+        feedbackEl.className = 'admin-feedback error';
+        feedbackEl.textContent = 'Request failed.';
+        console.error('Error adding new player:', err);
+    });
+});
