@@ -98,7 +98,7 @@ class AppManager:
                     norm_wager_data['player_has_bids'] = True
                 else:
                     norm_wager_data['player_has_bids'] = False
-                    errors.append('Player does not have {} bids available to fulfill wager.'.format(total_bids))
+                    errors.append('{} does not have {} bids available to fulfill wager.'.format(player_name, total_bids))
                 
                 if (len(errors) > 0):
                     norm_wager_data['valid'] = False
@@ -400,7 +400,7 @@ def start_background_polling():
     logging.info('Background polling started')
 
 
-# start_background_polling()  # Turn off when testing non-API features
+start_background_polling()  # LOOK HERE! Turn off when testing non-API features
 
 if __name__ == '__main__':
     start_background_polling()

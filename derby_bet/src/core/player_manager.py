@@ -87,12 +87,16 @@ class PlayerManager:
             self.players[str(int(player_id))]['latest_update'] = dt.datetime.now().isoformat()
     
     def _get_player_id(self, player_name=None, player_id=None):
-        assert (not isinstance(player_name, type(None))) or (not isinstance(player_id, type(None))), 'Expected to receive either player ID or player name for info lookup, received neither.'
+        try:
+            assert (not isinstance(player_name, type(None))) or (not isinstance(player_id, type(None))), 'Expected to receive either player ID or player name for info lookup, received neither.'
 
-        if isinstance(player_id, type(None)):
-            assert str(player_name) in self._map_name_id_dict.keys(), 'Player name received does not exist in the current player data. Received {}'.format(player_name)
-            player_id = self._map_name_id_dict.get(str(player_name))
-        return player_id
+            if isinstance(player_id, type(None)):
+                assert str(player_name) in self._map_name_id_dict.keys(), 'Player name received does not exist in the current player data. Received {}'.format(player_name)
+                player_id = self._map_name_id_dict.get(str(player_name))
+            return player_id
+        except:
+            logging.error('Invalid player ID entry.')
+            return -1
     
     def get_all_players_sorted(self, lastname_alpha=False, alphabetically=False, by_avail=False, by_won=False, by_lost=False):
         assert lastname_alpha or alphabetically or by_avail or by_won or by_lost, 'Expected to get a flag for how to sort all player data, received none'
@@ -172,8 +176,6 @@ class PlayerManager:
         player_id = self._get_player_id(player_name=player_name, player_id=player_id)
         
         pid_key = str(int(player_id))
-        assert pid_key in self.players.keys(), 'Player ID received ({}) does not exist in the current player data.'.format(player_id)
-
         with self.lock:
             return self.players.get(pid_key, {}).copy()
     
