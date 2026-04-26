@@ -192,6 +192,21 @@ def admin_finalize_race():
         return jsonify(_base_jsonify_return(False, 'Internal server error')), 500
 
 
+@app.route('/api/admin/add-player', methods=['POST'])
+def admin_add_player():
+    data = request.get_json()
+    if not data:
+        return jsonify(_base_jsonify_return(False, 'No JSON body received for adding new player')), 400
+
+    player_name = data.get('player_name')
+
+    try:
+        app_manager.player_manager.add_new_player(player_name)
+        return jsonify(_base_jsonify_return(True, f'New player ({player_name}) successfully added.'))
+    except Exception:
+        logging.error('Error adding new player', exc_info=True)
+        return jsonify(_base_jsonify_return(False, 'Internal server error')), 500
+
 # ============================================================================
 # STARTUP
 # ============================================================================
