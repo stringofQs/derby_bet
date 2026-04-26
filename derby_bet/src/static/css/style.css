@@ -426,7 +426,12 @@ body {
 }
 
 .player-list {
-    height: 345px;
+    height: 400px;
+    padding-right: 5px;
+}
+
+.player-available-list {
+    height: 1150px;
     padding-right: 5px;
 }
 
