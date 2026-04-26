@@ -464,6 +464,8 @@ document.getElementById('add-new-player').addEventListener('click', () => {
     .then(data => {
         feedbackEl.className = data._success ? 'admin-feedback success' : 'admin-feedback error';
         feedbackEl.textContent = data._message;
+        const playerElem = document.getElementById('new-player-name');
+        playerElem.textContent = '';
     })
     .catch(err => {
         feedbackEl.className = 'admin-feedback error';
