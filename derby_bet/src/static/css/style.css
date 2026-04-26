@@ -630,7 +630,7 @@ body {
 
 .pool-column-header {
     font-family: 'Cinzel', serif;
-    font-size: 25px;
+    font-size: 35px;
     font-weight: 700;
     text-align: center;
     text-transform: uppercase;
@@ -643,7 +643,7 @@ body {
 
 .pool-column-total {
     font-family: 'Montserrat', sans-serif;
-    font-size: 14px;
+    font-size: 20px;
     font-weight: 500;
     text-transform: none;
     letter-spacing: 0;
@@ -660,6 +660,8 @@ body {
     padding: 4px 6px;
     border-radius: 6px;
     transition: background 0.2s ease;
+    margin-top: 2px;
+    margin-bottom: 3px;
 }
 
 .horse-row:hover {
