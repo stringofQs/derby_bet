@@ -164,7 +164,7 @@ class RaceManager:
             return {}
         
         prev_race = self.get_race_info(int(race_num) - 1)
-        return prev_rece            
+        return prev_race
     
     def close_betting(self, race_num):
         logging.info(f'Closing betting for {race_num}')

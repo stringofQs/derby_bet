@@ -38,16 +38,30 @@ def normalize_trsc_fields(trsc_data):
     return output
 
 
+def _safe_int(value, default=0):
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        return default
+
+
+def _safe_float(value, default=0.0):
+    try:
+        return float(value)
+    except (ValueError, TypeError):
+        return default
+
+
 def normalize_trsc_values(trsc_data):
     output = trsc_data.copy()
-    output['player_id'] = int(output.get('player_id', 0))
-    output['amount_received'] = float(output.get('amount_received', 0.))
+    output['player_id'] = _safe_int(output.get('player_id', 0))
+    output['amount_received'] = _safe_float(output.get('amount_received', 0.))
     return output
 
 
 def normalize_wager_values(wager_data):
     output = wager_data.copy()
-    output['race_number'] = int(output.get('race_number', 0))
-    output['player_id'] = int(output.get('player_id', 0))
+    output['race_number'] = _safe_int(output.get('race_number', 0))
+    output['player_id'] = _safe_int(output.get('player_id', 0))
     return output
 

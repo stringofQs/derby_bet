@@ -2,6 +2,12 @@
 from pathlib import Path
 import threading
 import logging
+import json
+
+from derby_bet.src.utils.io_tools import find_project_root
+
+_BASE_DIR = find_project_root()
+_STATE_FILE = Path(_BASE_DIR, 'drb', 'wagers', 'wager_row_state.json')
 
 
 class WagerState:
@@ -10,15 +16,33 @@ class WagerState:
         logging.info('Initialized WagerState')
         self.all_wagers_unprocessed = []
         self.all_wagers_processed = []
-        self.last_processed_row = 0
         self.lock = threading.Lock()
-    
+        self.last_processed_row = self._load_last_row()
+
+    def _load_last_row(self):
+        if Path(_STATE_FILE).exists():
+            try:
+                with open(str(_STATE_FILE), 'r') as f:
+                    return int(json.load(f).get('last_processed_row', 0))
+            except Exception:
+                logging.warning('Could not load wager row state; defaulting to 0')
+        return 0
+
+    def _save_last_row(self):
+        try:
+            _STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+            with open(str(_STATE_FILE), 'w') as f:
+                json.dump({'last_processed_row': self.last_processed_row}, f)
+        except Exception as e:
+            logging.error(f'Failed to save wager row state: {e}')
+
     def update(self, new_unp_wagers, new_proc_wagers, total_rows):
         logging.debug(f'Updating wagers to new total {total_rows}')
         with self.lock:
             self.all_wagers_unprocessed.extend(new_unp_wagers)
             self.all_wagers_processed.extend(new_proc_wagers)
             self.last_processed_row = total_rows
+        self._save_last_row()
     
     def get_all(self, processed=False):
         with self.lock:

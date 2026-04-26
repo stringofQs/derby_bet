@@ -70,7 +70,7 @@ class PayoutCalculator:
 
     def _data_to_df(self):
         with self.lock:
-            vals = self.payout.values()
+            vals = self.payouts.values()
         
         df_dict = {}
         for dd in vals:
@@ -88,7 +88,7 @@ class PayoutCalculator:
         data = self._data_to_df()
         filt = pd.Series([False] * len(data))
 
-        if not isinstance(transaction_id, type(None)):
+        if not isinstance(payout_id, type(None)):
             filt &= (data['payout_id'] == int(payout_id))
         if not isinstance(race_num, type(None)):
             filt &= (data['race_number'] == int(race_num))
@@ -131,16 +131,18 @@ class PayoutCalculator:
         return selected_payouts
 
     def calculate_payouts(self, race_num, bet_type, posts, pool_dict, wagers, total_pool):
-        transactions = []
+        # Normalise posts to ints for consistent comparison
+        posts_int = [int(p) for p in posts]
 
         if len(pool_dict.keys()) == 0:
             logging.warning('No pool data for: Race={} | Bet={}'.format(race_num, bet_type))
-            return transactions
+            return [int(self.next_transaction_id), int(self.next_transaction_id)]
 
         if total_pool == 0:
             logging.warning('Pool total is 0 for Race={} | Bet={}'.format(race_num, bet_type))
-        
-        win_amount = sum([pool_dict.get(str(post), 0) for post in posts])
+            return [int(self.next_transaction_id), int(self.next_transaction_id)]
+
+        win_amount = sum([pool_dict.get(str(post), 0) for post in posts_int])
 
         first_payout_id = self.next_transaction_id
 
@@ -148,13 +150,17 @@ class PayoutCalculator:
             pid = wager.get('player_id', 0)
             wager_post = wager.get('{}_post'.format(bet_type), 0)
             wager_amount = float(wager.get('{}_bid'.format(bet_type), 0))
-            if str(int(wager_post)) not in posts:  # Specific wager is a losing post
+            if int(wager_post) not in posts_int:  # Specific wager is a losing post
                 self.add_new_payout(
                     race_num, pid, bet_type, wager_post, wager_amount, 0
                 )
-            
+
             else:  # Wager is for a winning post
-                share = (wager_amount / win_amount) * total_pool
+                if win_amount == 0:
+                    logging.warning('Win amount is 0 for Race={} | Bet={} — no payout share calculated'.format(race_num, bet_type))
+                    share = 0.0
+                else:
+                    share = (wager_amount / win_amount) * total_pool
                 self.add_new_payout(
                     race_num, pid, bet_type, wager_post, wager_amount, share
                 )

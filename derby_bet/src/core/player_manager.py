@@ -139,7 +139,10 @@ class PlayerManager:
             
     def is_valid_player(self, player_name=None, player_id=None):
         try:
-            _ = self.get_player_info(player_name=player_name, player_id=player_id)
+            info = self.get_player_info(player_name=player_name, player_id=player_id)
+            if not info:
+                logging.warning('Player received is invalid (no data): {} | {}'.format(player_name, player_id))
+                return False
         except Exception as _:
             logging.warning('Player received is invalid: {} | {}'.format(player_name, player_id))
             return False

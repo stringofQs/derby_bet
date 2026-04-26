@@ -94,7 +94,10 @@ class AppManager:
                 total_bids = win_bid + place_bid + show_bid
                 norm_wager_data['total_bid'] = total_bids
 
-                if self.player_manager.has_bids_available(total_bids, player_name=player_name):
+                if player_id == -1:
+                    # Player is already invalid — don't query bids against a phantom player
+                    norm_wager_data['player_has_bids'] = False
+                elif self.player_manager.has_bids_available(total_bids, player_name=player_name):
                     norm_wager_data['player_has_bids'] = True
                 else:
                     norm_wager_data['player_has_bids'] = False
@@ -335,6 +338,10 @@ def poll_wagers(update_time=5):
         try:
             all_responses = gapi.get_form_responses(gapi.WAGER_RANGE_NAME)
             new_responses = all_responses[app_manager.wager_state.last_processed_row:]
+            if not new_responses:
+                app_manager.wager_state.update([], [], len(all_responses))
+                sleep(update_time)
+                continue
             new_processed = process_wager(new_responses)
             app_manager.wager_state.update(new_responses, new_processed, len(all_responses))
             if (len(new_responses) > 0):
@@ -378,7 +385,11 @@ def poll_transactions(update_time=10):
         try:
             all_responses = gapi.get_form_responses(gapi.TRANSACTION_RANGE_NAME)
             new_responses = all_responses[app_manager.transaction_manager.last_processed_row:]
-            new_processed = process_transaction(new_responses)  # TODO: @PF FIX
+            if not new_responses:
+                app_manager.transaction_manager.update([], [], len(all_responses))
+                sleep(update_time)
+                continue
+            new_processed = process_transaction(new_responses)
             app_manager.transaction_manager.update(new_responses, new_processed, len(all_responses))
             if (len(new_responses) > 0):
                 output_state_trs(app_manager.transaction_manager.get_all(processed=False), processed=False)
