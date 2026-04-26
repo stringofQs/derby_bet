@@ -56,7 +56,8 @@ async function fetchPlayers() {
         const response = await fetch('/api/players');
         const data = await response.json();
         if (data._success) {
-            updatePlayersPanel(data.players);
+            updatePlayersPanel(data.lead_players);
+            updateAvailPanel(data.all_players);
         } else {
             console.error('Backend error fetching players:', data._message);
         }
@@ -138,7 +139,7 @@ function updatePlayersPanel(players) {
     clearElement(panel);
 
     if (!players || players.length === 0) {
-        panel.appendChild(createElem('div', 'no-data', 'No players yet...'));
+        panel.appendChild(createElem('div', 'no-data', 'No leaders yet...'));
         return;
     }
 
@@ -147,9 +148,30 @@ function updatePlayersPanel(players) {
 
         const rank = createElem('span', 'rank', String(index + 1));
         const name = createElem('span', 'player-name', plyr.player_name);
-        const balance = createElem('span', 'player-balance', String(plyr.bids.available));
+        const balance = createElem('span', 'player-balance', String(plyr.bids.won));
 
         item.appendChild(rank);
+        item.appendChild(name);
+        item.appendChild(balance);
+        panel.appendChild(item);
+    });
+}
+
+function updateAvailPanel(players) {
+    const panel = document.getElementById('players-available-panel');
+    clearElement(panel);
+
+    if (!players || players.length === 0) {
+        panel.appendChild(createElem('div', 'no-data', 'No players available bids...'));
+        return;
+    }
+
+    players.forEach((plyr, index) => {
+        const item = createElem('div', 'player-item-small');
+        
+        const name = createElem('span', 'player-name', plyr.player_name);
+        const balance = createElem('span', 'player-balance', String(plyr.bids.available));
+
         item.appendChild(name);
         item.appendChild(balance);
         panel.appendChild(item);
