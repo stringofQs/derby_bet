@@ -32,6 +32,8 @@ def _push_sse_event(data):
         for client_queue in _sse_clients[:]:
             client_queue.put(data)
 
+app_manager.sse_push_callback = _push_sse_event
+
 def _base_jsonify_return(success, message):
     return {'_success': success, '_message': message}
 

@@ -39,6 +39,7 @@ class AppManager:
             return
         
         self.global_lock = threading.Lock()
+        self.sse_push_callback = None
 
         # Initialize all managers
         self.transaction_manager = TransactionManager()
@@ -339,6 +340,30 @@ def poll_wagers(update_time=5):
             if (len(new_responses) > 0):
                 output_state_wgr(app_manager.wager_state.get_all(processed=False), processed=False)
                 output_state_wgr(app_manager.wager_state.get_all(processed=True), processed=True)
+
+                if app_manager.sse_push_callback:
+                    results = []
+                    for w in new_processed:
+                        bets = []
+                        if str(w.get('win_post', '')).strip():
+                            bets.append({'type': 'Win', 'post': w.get('win_post'), 'bid': w.get('win_bid', 0)})
+                        if str(w.get('place_post', '')).strip():
+                            bets.append({'type': 'Place', 'post': w.get('place_post'), 'bid': w.get('place_bid', 0)})
+                        if str(w.get('show_post', '')).strip():
+                            bets.append({'type': 'Show', 'post': w.get('show_post'), 'bid': w.get('show_bid', 0)})
+                        results.append({
+                            'player_name': w.get('player_name', 'Unknown'),
+                            'race_number': w.get('race_number', '?'),
+                            'valid': w.get('valid', False),
+                            'total_bid': w.get('total_bid', 0),
+                            'bets': bets,
+                            'errors': w.get('errors', ''),
+                            'timestamp': dt.datetime.now().isoformat()
+                        })
+                    app_manager.sse_push_callback({
+                        'type': 'wager_processed',
+                        'results': results
+                    })
 
             logging.info(f'Processed {len(new_processed)} new wagers. Total received: {len(all_responses)}')
 
