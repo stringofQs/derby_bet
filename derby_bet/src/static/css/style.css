@@ -445,6 +445,21 @@ body {
     font-weight: 700;
 }
 
+.player-item-small {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px;
+    margin-bottom: 5px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    border-left: 4px solid var(--derby-gold);
+    transition: all 0.3s ease;
+    color: var(--derby-cream);
+    font-size: 20px;
+    font-weight: 650;
+}
+
 .player-item:hover {
     background: rgba(212, 175, 55, 0.1);
     transform: translateX(5px);

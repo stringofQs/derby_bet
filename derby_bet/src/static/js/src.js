@@ -167,13 +167,11 @@ function updateAvailPanel(players) {
     }
 
     players.forEach((plyr, index) => {
-        const item = createElem('div', 'player-item');
+        const item = createElem('div', 'player-item-small');
         
-        const rank = createElem('span', 'rank', String(index + 1));
         const name = createElem('span', 'player-name', plyr.player_name);
         const balance = createElem('span', 'player-balance', String(plyr.bids.available));
 
-        item.appendChild(rank);
         item.appendChild(name);
         item.appendChild(balance);
         panel.appendChild(item);
