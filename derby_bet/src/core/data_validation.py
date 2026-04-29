@@ -40,6 +40,7 @@ def normalize_trsc_fields(trsc_data):
 
 def _safe_int(value, default=0):
     try:
+        value = str(value).strip().replace(' ', '').replace('\t', '').replace('-', '').replace('_', '')
         return int(value)
     except (ValueError, TypeError):
         return default
@@ -47,6 +48,7 @@ def _safe_int(value, default=0):
 
 def _safe_float(value, default=0.0):
     try:
+        value = str(value).strip().replace(' ', '').replace('\t', '').replace('-', '').replace('_', '')
         return float(value)
     except (ValueError, TypeError):
         return default
