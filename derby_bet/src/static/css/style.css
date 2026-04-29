@@ -709,7 +709,7 @@ body {
 .horse-row-amount {
     font-size: 25px;
     font-weight: 500;
-    min-width: 70px;
+    min-width: 110px;
     text-align: right;
     color: var(--derby-cream);
 }
