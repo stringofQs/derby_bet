@@ -259,6 +259,17 @@ function updateRaceSchedulePanel(raceSchedule) {
     });
 }
 
+function gcd(a, b) { while (b) { [a, b] = [b, a % b]; } return a; }
+
+function toTraditionalOdds(amount, total) {
+    if (amount <= 0 || total <= 0 || amount >= total) return '—';
+    const profit = total - amount;
+    const g = gcd(profit, amount);
+    const n = profit / g;
+    const d = amount / g;
+    return d === 1 ? `${n} to 1` : `${n} to ${d}`;
+}
+
 function updateCurrentRacePoolPanel(poolData) {
     const panel = document.getElementById('current-race-pool-panel');
     clearElement(panel);
@@ -295,13 +306,10 @@ function updateCurrentRacePoolPanel(poolData) {
             bar.appendChild(fill);
             row.appendChild(bar);
 
-            // Multiplier: total pool / bids on this post.
-            // For win this is exact; for place/show it is the upper-bound since
-            // the pool is shared among the top 2 or top 3 finishers.
-            const multiplier = (amount > 0 && total > 0)
-                ? `${(total / amount).toFixed(1)}x`
-                : '—';
-            row.appendChild(createElem('span', 'horse-row-amount', multiplier));
+            // Traditional pari-mutuel odds: profit to stake, expressed as an
+            // exact integer ratio. For place/show this is the upper-bound since
+            // the pool is split among top 2 or top 3 finishers.
+            row.appendChild(createElem('span', 'horse-row-amount', toTraditionalOdds(amount, total)));
             col.appendChild(row);
         }
 
