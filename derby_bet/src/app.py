@@ -12,7 +12,7 @@ from derby_bet.src.utils.log_utils import setup_logger
 from derby_bet.src.core.app_manager import app_manager, start_background_polling
 
 # Inputs --------------------------
-LOG_LEVEL = logging.DEBUG
+LOG_LEVEL = logging.INFO
 _PORT = 5050
 
 # Setup ---------------------------
