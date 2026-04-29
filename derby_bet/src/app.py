@@ -9,7 +9,7 @@ from flask import Flask, render_template, jsonify, request, Response
 import webbrowser
 
 from derby_bet.src.utils.log_utils import setup_logger
-from derby_bet.src.core.app_manager import app_manager
+from derby_bet.src.core.app_manager import app_manager, start_background_polling
 
 # Inputs --------------------------
 LOG_LEVEL = logging.DEBUG
@@ -218,6 +218,7 @@ def open_browser():
     webbrowser.open_new(f'http://0.0.0.0:{_PORT}')
 
 if __name__ == '__main__':
-    if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+    if os.environ.get('WERKZEUG_RUN_MAIN') == 'true' or not _DEBUG:
+        start_background_polling()
         threading.Timer(1.0, open_browser).start()
     app.run(host='0.0.0.0', port=_PORT, debug=_DEBUG)

@@ -94,6 +94,8 @@ function setupEventSource() {
             updateRaceSchedulePanel(data.race_schedule);
         } else if (data.type === 'wager_processed') {
             data.results.forEach(wager => addIssueLogEntry(wager));
+        } else if (data.type === 'transaction_processed') {
+            data.results.forEach(trsc => addTransactionLogEntry(trsc));
         }
     };
 
@@ -344,6 +346,34 @@ function addIssueLogEntry(wager) {
     entry.appendChild(createElem('div', 'issue-time', time.toLocaleTimeString()));
 
     // Prepend so newest entries appear at the top
+    panel.insertBefore(entry, panel.firstChild);
+}
+
+function addTransactionLogEntry(trsc) {
+    const panel = document.getElementById('issue-log-list');
+
+    const placeholder = panel.querySelector('.no-data');
+    if (placeholder) panel.removeChild(placeholder);
+
+    const entry = createElem('div', `issue-entry ${trsc.valid ? 'success' : 'error'}`);
+
+    const header = createElem('div', 'issue-entry-header');
+    header.appendChild(createElem('span', 'issue-status', trsc.valid ? '✓' : '✗'));
+    header.appendChild(createElem('span', 'issue-player', trsc.player_name));
+    header.appendChild(createElem('span', 'issue-race', 'Payment'));
+    entry.appendChild(header);
+
+    if (trsc.valid) {
+        const bids = Math.round(trsc.bids_received);
+        const amt = parseFloat(trsc.amount_received).toFixed(2);
+        entry.appendChild(createElem('div', 'issue-detail', `$${amt} received — ${bids} bids added`));
+    } else {
+        entry.appendChild(createElem('div', 'issue-detail error-text', trsc.errors));
+    }
+
+    const time = new Date(trsc.timestamp);
+    entry.appendChild(createElem('div', 'issue-time', time.toLocaleTimeString()));
+
     panel.insertBefore(entry, panel.firstChild);
 }
 
