@@ -38,6 +38,41 @@ def normalize_trsc_fields(trsc_data):
     return output
 
 
+def _parse_post_bid(post_raw, bid_raw, field_name):
+    """Parse a post + bid pair. Returns (post, bid, error).
+
+    Both blank  -> (None, 0, None)   — no bet placed, not an error
+    One blank   -> (None, 0, error)  — incompatible pair
+    Non-integer -> (None, 0, error)  — bad value
+    Both valid  -> (int, int, None)
+    """
+    def _clean(v):
+        return str(v).strip().replace(' ', '').replace('\t', '').replace('-', '').replace('_', '')
+
+    post_clean = _clean(post_raw)
+    bid_clean = _clean(bid_raw)
+    post_blank = len(post_clean) == 0
+    bid_blank = len(bid_clean) == 0
+
+    if post_blank and bid_blank:
+        return None, 0, None
+
+    if post_blank != bid_blank:
+        return None, 0, 'Incompatible {} post + bid: "{}" & "{}"'.format(field_name, post_raw, bid_raw)
+
+    try:
+        post = int(post_clean)
+    except ValueError:
+        return None, 0, 'Invalid {} post value: "{}"'.format(field_name, post_raw)
+
+    try:
+        bid = int(bid_clean)
+    except ValueError:
+        return None, 0, 'Invalid {} bid value: "{}"'.format(field_name, bid_raw)
+
+    return post, bid, None
+
+
 def _safe_int(value, default=0):
     try:
         value = str(value).strip().replace(' ', '').replace('\t', '').replace('-', '').replace('_', '')

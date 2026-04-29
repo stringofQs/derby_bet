@@ -9,7 +9,7 @@ import logging
 
 from derby_bet.src.utils import google_api as gapi
 from derby_bet.src.utils.io_tools import find_project_root
-from derby_bet.src.core.data_validation import normalize_wager_fields, normalize_wager_values, normalize_trsc_fields, normalize_trsc_values
+from derby_bet.src.core.data_validation import normalize_wager_fields, normalize_wager_values, normalize_trsc_fields, normalize_trsc_values, _parse_post_bid
 from derby_bet.src.core.transaction_manager import TransactionManager
 from derby_bet.src.core.race_manager import RaceManager
 from derby_bet.src.core.player_manager import PlayerManager
@@ -73,24 +73,30 @@ class AppManager:
                 if not self.race_manager.is_valid_race(race_number):
                     errors.append('Invalid race number: {}'.format(race_number))
                 
-                win_post = norm_wager_data.get('win_post', -1)
-                win_bid = norm_wager_data.get('win_bid', 0)
-                if ((len(str(win_post)) == 0) and (len(str(win_bid)) != 0)) or ((len(str(win_post)) != 0) and (len(str(win_bid)) == 0)):
-                    errors.append('Win post + bid received are incompatible: {} + {}'.format(win_post, win_bid))
+                win_post, win_bid, win_err = _parse_post_bid(
+                    norm_wager_data.get('win_post', ''), norm_wager_data.get('win_bid', ''), 'win'
+                )
+                if win_err:
+                    errors.append(win_err)
+                norm_wager_data['win_post'] = win_post if win_post is not None else ''
+                norm_wager_data['win_bid'] = win_bid
 
-                place_post = norm_wager_data.get('place_post', -1)
-                place_bid = norm_wager_data.get('place_bid', 0)
-                if ((len(str(place_post)) == 0) and (len(str(place_bid)) != 0)) or ((len(str(place_post)) != 0) and (len(str(place_bid)) == 0)):
-                    errors.append('Place post + bid received are incompatible: {} + {}'.format(place_post, place_bid))
-                
-                show_post = norm_wager_data.get('show_post', -1)
-                show_bid = norm_wager_data.get('show_bid', 0)
-                if ((len(str(show_post)) == 0) and (len(str(show_bid)) != 0)) or ((len(str(show_post)) != 0) and (len(str(show_bid)) == 0)):
-                    errors.append('Show post + bid received are incompatible: {} + {}'.format(show_post, show_bid))
+                place_post, place_bid, place_err = _parse_post_bid(
+                    norm_wager_data.get('place_post', ''), norm_wager_data.get('place_bid', ''), 'place'
+                )
+                if place_err:
+                    errors.append(place_err)
+                norm_wager_data['place_post'] = place_post if place_post is not None else ''
+                norm_wager_data['place_bid'] = place_bid
 
-                win_bid = 0 if len(str(win_bid)) == 0 else int(str(win_bid))
-                place_bid = 0 if len(str(place_bid)) == 0 else int(str(place_bid))
-                show_bid = 0 if len(str(show_bid)) == 0 else int(str(show_bid))
+                show_post, show_bid, show_err = _parse_post_bid(
+                    norm_wager_data.get('show_post', ''), norm_wager_data.get('show_bid', ''), 'show'
+                )
+                if show_err:
+                    errors.append(show_err)
+                norm_wager_data['show_post'] = show_post if show_post is not None else ''
+                norm_wager_data['show_bid'] = show_bid
+
                 total_bids = win_bid + place_bid + show_bid
                 norm_wager_data['total_bid'] = total_bids
 
@@ -410,8 +416,6 @@ def start_background_polling():
     poll_trsc.start()
     logging.info('Background polling started')
 
-
-start_background_polling()  # LOOK HERE! Turn off when testing non-API features
 
 if __name__ == '__main__':
     start_background_polling()
