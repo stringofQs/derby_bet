@@ -401,6 +401,23 @@ def poll_transactions(update_time=10):
                 output_state_trs(app_manager.transaction_manager.get_all(processed=False), processed=False)
                 output_state_trs(app_manager.transaction_manager.get_all(processed=True), processed=True)
 
+                if app_manager.sse_push_callback:
+                    results = []
+                    for t in new_processed:
+                        player_info = app_manager.player_manager.get_player_info(player_id=t.get('player_id', 0))
+                        results.append({
+                            'player_name': player_info.get('player_name', 'Unknown'),
+                            'amount_received': t.get('amount_received', 0.),
+                            'bids_received': t.get('bids_received', 0.),
+                            'valid': t.get('valid', False),
+                            'errors': t.get('errors', ''),
+                            'timestamp': dt.datetime.now().isoformat()
+                        })
+                    app_manager.sse_push_callback({
+                        'type': 'transaction_processed',
+                        'results': results
+                    })
+
             logging.info(f'Processed {len(new_processed)} new transactions. Total received: {len(all_responses)}')
 
         except Exception as e:
