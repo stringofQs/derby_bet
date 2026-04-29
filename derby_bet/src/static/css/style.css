@@ -944,7 +944,7 @@ body {
 }
 
 .issue-status {
-    font-size: 18px;
+    font-size: 24px;
     font-weight: 700;
     flex-shrink: 0;
 }
@@ -958,20 +958,20 @@ body {
 }
 
 .issue-player {
-    font-size: 16px;
+    font-size: 24px;
     font-weight: 600;
     color: var(--text-primary);
     flex: 1;
 }
 
 .issue-race {
-    font-size: 14px;
+    font-size: 20px;
     color: var(--derby-gold);
     flex-shrink: 0;
 }
 
 .issue-detail {
-    font-size: 14px;
+    font-size: 22px;
     color: rgba(244, 239, 224, 0.75);
     padding-left: 28px;
     margin-bottom: 4px;
@@ -982,7 +982,7 @@ body {
 }
 
 .issue-time {
-    font-size: 12px;
+    font-size: 16px;
     color: rgba(244, 239, 224, 0.45);
     padding-left: 28px;
 }
