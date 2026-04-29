@@ -10,6 +10,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // SSE for race finalization events pushed from the backend
     setupEventSource();
+
+    // Initialize the wager feed to idle state (no historical endpoint)
+    initIssueLog();
 });
 
 
@@ -89,6 +92,8 @@ function setupEventSource() {
             updateCurrentRacePanel(data.current_race);
             updatePreviousRacePanel(data.previous_race);
             updateRaceSchedulePanel(data.race_schedule);
+        } else if (data.type === 'wager_processed') {
+            data.results.forEach(wager => addIssueLogEntry(wager));
         }
     };
 
@@ -305,6 +310,44 @@ function updateCurrentRacePoolPanel(poolData) {
 }
 
 
+function initIssueLog() {
+    const panel = document.getElementById('issue-log-list');
+    clearElement(panel);
+    panel.appendChild(createElem('div', 'no-data', 'Waiting for wagers...'));
+}
+
+function addIssueLogEntry(wager) {
+    const panel = document.getElementById('issue-log-list');
+
+    // Remove the idle placeholder on first real entry
+    const placeholder = panel.querySelector('.no-data');
+    if (placeholder) panel.removeChild(placeholder);
+
+    const entry = createElem('div', `issue-entry ${wager.valid ? 'success' : 'error'}`);
+
+    const header = createElem('div', 'issue-entry-header');
+    header.appendChild(createElem('span', 'issue-status', wager.valid ? '✓' : '✗'));
+    header.appendChild(createElem('span', 'issue-player', wager.player_name));
+    header.appendChild(createElem('span', 'issue-race', `Race ${wager.race_number}`));
+    entry.appendChild(header);
+
+    if (wager.valid && wager.bets && wager.bets.length > 0) {
+        const betsText = wager.bets.map(b => `${b.type} #${b.post} (${b.bid})`).join(' · ');
+        entry.appendChild(createElem('div', 'issue-detail', betsText));
+    } else if (wager.valid) {
+        entry.appendChild(createElem('div', 'issue-detail', `${wager.total_bid} bids placed`));
+    } else {
+        entry.appendChild(createElem('div', 'issue-detail error-text', wager.errors));
+    }
+
+    const time = new Date(wager.timestamp);
+    entry.appendChild(createElem('div', 'issue-time', time.toLocaleTimeString()));
+
+    // Prepend so newest entries appear at the top
+    panel.insertBefore(entry, panel.firstChild);
+}
+
+
 // ============================================================================
 // ADMIN MODAL
 // ============================================================================
@@ -421,6 +464,8 @@ document.getElementById('add-new-player').addEventListener('click', () => {
     .then(data => {
         feedbackEl.className = data._success ? 'admin-feedback success' : 'admin-feedback error';
         feedbackEl.textContent = data._message;
+        const playerElem = document.getElementById('new-player-name');
+        playerElem.textContent = '';
     })
     .catch(err => {
         feedbackEl.className = 'admin-feedback error';

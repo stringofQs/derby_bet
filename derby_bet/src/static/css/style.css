@@ -906,6 +906,88 @@ body {
 }
 
 /* ============================================================================
+   ISSUES / WAGER FEED PANEL
+   ============================================================================ */
+
+.issue-log-panel {
+    margin-top: 25px;
+}
+
+.issues-list {
+    height: 900px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.issue-entry {
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    border-left: 4px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.issue-entry.success {
+    border-left-color: var(--mint-julep);
+}
+
+.issue-entry.error {
+    border-left-color: #e05252;
+}
+
+.issue-entry-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+.issue-status {
+    font-size: 18px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.issue-entry.success .issue-status {
+    color: var(--mint-julep);
+}
+
+.issue-entry.error .issue-status {
+    color: #e05252;
+}
+
+.issue-player {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+}
+
+.issue-race {
+    font-size: 14px;
+    color: var(--derby-gold);
+    flex-shrink: 0;
+}
+
+.issue-detail {
+    font-size: 14px;
+    color: rgba(244, 239, 224, 0.75);
+    padding-left: 28px;
+    margin-bottom: 4px;
+}
+
+.issue-detail.error-text {
+    color: #e05252;
+}
+
+.issue-time {
+    font-size: 12px;
+    color: rgba(244, 239, 224, 0.45);
+    padding-left: 28px;
+}
+
+/* ============================================================================
    LOADING & NO DATA STATES
    ============================================================================ */
 

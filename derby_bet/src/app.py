@@ -32,6 +32,8 @@ def _push_sse_event(data):
         for client_queue in _sse_clients[:]:
             client_queue.put(data)
 
+app_manager.sse_push_callback = _push_sse_event
+
 def _base_jsonify_return(success, message):
     return {'_success': success, '_message': message}
 
@@ -72,7 +74,7 @@ def get_race_info():
         logging.error('Error fetching previous race data from RaceManager', exc_info=True)
     
     try:
-        race_schedule = app_manager.race_manager.get_upcoming_races(minutes_ahead=50000)
+        race_schedule = app_manager.race_manager.get_upcoming_races(num_races=5)
     except Exception:
         msg.append('Error fetching race schedule')
         logging.error('Error fetching race schedule from RaceManager', exc_info=True)
@@ -175,7 +177,7 @@ def admin_finalize_race():
 
         current_race = app_manager.race_manager.get_next_race()
         previous_race = app_manager.race_manager.get_race_info(race_num)
-        race_schedule = app_manager.race_manager.get_upcoming_races(minutes_ahead=50000)
+        race_schedule = app_manager.race_manager.get_upcoming_races(num_races=5)
 
         _push_sse_event({
             'type': 'race_finalized',

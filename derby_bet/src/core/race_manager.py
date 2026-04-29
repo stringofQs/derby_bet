@@ -114,21 +114,32 @@ class RaceManager:
         if self.has_results(race_num):
             return {'win': ind_race.get('win'), 'place': ind_race.get('place'), 'show': ind_race.get('show')}
         
-    def get_upcoming_races(self, minutes_ahead):
-        assert isinstance(minutes_ahead, int) or isinstance(minutes_ahead, float), 'Expected a number of minutes ahead, received {}'.format(minutes_ahead)
-        now_ts = dt.datetime.now()
+    def get_upcoming_races(self, minutes_ahead=None, num_races=None):
+        assert isinstance(minutes_ahead, int) or isinstance(minutes_ahead, float) or isinstance(num_races, int), 'Expected a number of minutes ahead, received {}'.format(minutes_ahead)
+        
         upcoming = []
+        if not isinstance(minutes_ahead, type(None)):
+            now_ts = dt.datetime.now()
 
-        for r_id in sorted([int(i) for i in list(self.races.keys())]):
-            r_dict = self.get_race_info(str(int(r_id)))
-            if str(r_dict['status']).lower() in ['closed', 'complete']:
-                continue
+            for r_id in sorted([int(i) for i in list(self.races.keys())]):
+                r_dict = self.get_race_info(str(int(r_id)))
+                if str(r_dict['status']).lower() in ['closed', 'complete']:
+                    continue
 
-            post_time = dt.datetime.fromisoformat(r_dict['post_time'])
-            minutes_until = (post_time - now_ts).total_seconds() / 60.
+                post_time = dt.datetime.fromisoformat(r_dict['post_time'])
+                minutes_until = (post_time - now_ts).total_seconds() / 60.
 
-            if (0 <= minutes_until <= minutes_ahead):
-                upcoming.append(r_dict)
+                if (0 <= minutes_until <= minutes_ahead):
+                    upcoming.append(r_dict)
+
+        elif not isinstance(num_races, type(None)):
+            for r_id in sorted([int(i) for i in list(self.races.keys())]):
+                r_dict = self.get_race_info(str(int(r_id)))
+                if str(r_dict['status']).lower() in ['closed', 'complete']:
+                    continue
+                
+                if len(upcoming) < num_races:
+                    upcoming.append(r_dict)
         
         return upcoming
 
@@ -164,7 +175,7 @@ class RaceManager:
             return {}
         
         prev_race = self.get_race_info(int(race_num) - 1)
-        return prev_rece            
+        return prev_race
     
     def close_betting(self, race_num):
         logging.info(f'Closing betting for {race_num}')

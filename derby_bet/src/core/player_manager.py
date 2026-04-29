@@ -1,7 +1,6 @@
 # Imports
 from pathlib import Path
 import datetime as dt
-from typing import Optional, Dict, List
 import json
 import threading
 import logging
@@ -66,7 +65,7 @@ class PlayerManager:
         
         for k, v in data.items():
             player_name = v.get('player_name')
-            self._map_name_id_dict[str(player_name)] = str(int(k))
+            self._map_name_id_dict[str(player_name).lower().replace(' ', '')] = str(int(k))
             
         return data
     
@@ -87,12 +86,16 @@ class PlayerManager:
             self.players[str(int(player_id))]['latest_update'] = dt.datetime.now().isoformat()
     
     def _get_player_id(self, player_name=None, player_id=None):
-        assert (not isinstance(player_name, type(None))) or (not isinstance(player_id, type(None))), 'Expected to receive either player ID or player name for info lookup, received neither.'
+        try:
+            assert (not isinstance(player_name, type(None))) or (not isinstance(player_id, type(None))), 'Expected to receive either player ID or player name for info lookup, received neither.'
 
-        if isinstance(player_id, type(None)):
-            assert str(player_name) in self._map_name_id_dict.keys(), 'Player name received does not exist in the current player data. Received {}'.format(player_name)
-            player_id = self._map_name_id_dict.get(str(player_name))
-        return player_id
+            if isinstance(player_id, type(None)):
+                assert str(player_name).lower().replace(' ', '') in self._map_name_id_dict.keys(), 'Player name received does not exist in the current player data. Received {}'.format(player_name)
+                player_id = self._map_name_id_dict.get(str(player_name).lower().replace(' ', ''))
+            return player_id
+        except:
+            logging.error('Invalid player ID entry.')
+            return -1
     
     def get_all_players_sorted(self, lastname_alpha=False, alphabetically=False, by_avail=False, by_won=False, by_lost=False):
         assert lastname_alpha or alphabetically or by_avail or by_won or by_lost, 'Expected to get a flag for how to sort all player data, received none'
@@ -135,14 +138,17 @@ class PlayerManager:
             
     def is_valid_player(self, player_name=None, player_id=None):
         try:
-            _ = self.get_player_info(player_name=player_name, player_id=player_id)
+            info = self.get_player_info(player_name=player_name, player_id=player_id)
+            if not info:
+                logging.warning('Player received is invalid (no data): {} | {}'.format(player_name, player_id))
+                return False
         except Exception as _:
             logging.warning('Player received is invalid: {} | {}'.format(player_name, player_id))
             return False
         return True
 
     def add_new_player(self, player_name):
-        if player_name in self._map_name_id_dict.keys():
+        if player_name.lower().replace(' ', '') in self._map_name_id_dict.keys():
             logging.warning('Provided player ({}) already exists. Not adding as a new player.'.format(player_name))
         else:
             new_id = self.total_players + 1
@@ -163,7 +169,7 @@ class PlayerManager:
             
             logging.info('New player added: {} | {}'.format(player_name, new_id))
             self._timestamp_player_change(int(new_id))
-            self._map_name_id_dict[player_name] = str(int(new_id))
+            self._map_name_id_dict[player_name.lower().replace(' ', '')] = str(int(new_id))
             self._update_player_count()
 
             self._save_players()
@@ -172,8 +178,6 @@ class PlayerManager:
         player_id = self._get_player_id(player_name=player_name, player_id=player_id)
         
         pid_key = str(int(player_id))
-        assert pid_key in self.players.keys(), 'Player ID received ({}) does not exist in the current player data.'.format(player_id)
-
         with self.lock:
             return self.players.get(pid_key, {}).copy()
     

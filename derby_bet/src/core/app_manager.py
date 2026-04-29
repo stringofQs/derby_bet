@@ -39,6 +39,7 @@ class AppManager:
             return
         
         self.global_lock = threading.Lock()
+        self.sse_push_callback = None
 
         # Initialize all managers
         self.transaction_manager = TransactionManager()
@@ -93,11 +94,14 @@ class AppManager:
                 total_bids = win_bid + place_bid + show_bid
                 norm_wager_data['total_bid'] = total_bids
 
-                if self.player_manager.has_bids_available(total_bids, player_name=player_name):
+                if player_id == -1:
+                    # Player is already invalid — don't query bids against a phantom player
+                    norm_wager_data['player_has_bids'] = False
+                elif self.player_manager.has_bids_available(total_bids, player_name=player_name):
                     norm_wager_data['player_has_bids'] = True
                 else:
                     norm_wager_data['player_has_bids'] = False
-                    errors.append('Player does not have {} bids available to fulfill wager.'.format(total_bids))
+                    errors.append('{} does not have {} bids available to fulfill wager.'.format(player_name, total_bids))
                 
                 if (len(errors) > 0):
                     norm_wager_data['valid'] = False
@@ -334,11 +338,39 @@ def poll_wagers(update_time=5):
         try:
             all_responses = gapi.get_form_responses(gapi.WAGER_RANGE_NAME)
             new_responses = all_responses[app_manager.wager_state.last_processed_row:]
+            if not new_responses:
+                app_manager.wager_state.update([], [], len(all_responses))
+                sleep(update_time)
+                continue
             new_processed = process_wager(new_responses)
             app_manager.wager_state.update(new_responses, new_processed, len(all_responses))
             if (len(new_responses) > 0):
                 output_state_wgr(app_manager.wager_state.get_all(processed=False), processed=False)
                 output_state_wgr(app_manager.wager_state.get_all(processed=True), processed=True)
+
+                if app_manager.sse_push_callback:
+                    results = []
+                    for w in new_processed:
+                        bets = []
+                        if str(w.get('win_post', '')).strip():
+                            bets.append({'type': 'Win', 'post': w.get('win_post'), 'bid': w.get('win_bid', 0)})
+                        if str(w.get('place_post', '')).strip():
+                            bets.append({'type': 'Place', 'post': w.get('place_post'), 'bid': w.get('place_bid', 0)})
+                        if str(w.get('show_post', '')).strip():
+                            bets.append({'type': 'Show', 'post': w.get('show_post'), 'bid': w.get('show_bid', 0)})
+                        results.append({
+                            'player_name': w.get('player_name', 'Unknown'),
+                            'race_number': w.get('race_number', '?'),
+                            'valid': w.get('valid', False),
+                            'total_bid': w.get('total_bid', 0),
+                            'bets': bets,
+                            'errors': w.get('errors', ''),
+                            'timestamp': dt.datetime.now().isoformat()
+                        })
+                    app_manager.sse_push_callback({
+                        'type': 'wager_processed',
+                        'results': results
+                    })
 
             logging.info(f'Processed {len(new_processed)} new wagers. Total received: {len(all_responses)}')
 
@@ -353,7 +385,11 @@ def poll_transactions(update_time=10):
         try:
             all_responses = gapi.get_form_responses(gapi.TRANSACTION_RANGE_NAME)
             new_responses = all_responses[app_manager.transaction_manager.last_processed_row:]
-            new_processed = process_transaction(new_responses)  # TODO: @PF FIX
+            if not new_responses:
+                app_manager.transaction_manager.update([], [], len(all_responses))
+                sleep(update_time)
+                continue
+            new_processed = process_transaction(new_responses)
             app_manager.transaction_manager.update(new_responses, new_processed, len(all_responses))
             if (len(new_responses) > 0):
                 output_state_trs(app_manager.transaction_manager.get_all(processed=False), processed=False)
@@ -375,7 +411,7 @@ def start_background_polling():
     logging.info('Background polling started')
 
 
-# start_background_polling()  # Turn off when testing non-API features
+start_background_polling()  # LOOK HERE! Turn off when testing non-API features
 
 if __name__ == '__main__':
     start_background_polling()
