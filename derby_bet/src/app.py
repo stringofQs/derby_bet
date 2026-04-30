@@ -12,7 +12,7 @@ from derby_bet.src.utils.log_utils import setup_logger
 from derby_bet.src.core.app_manager import app_manager, start_background_polling
 
 # Inputs --------------------------
-LOG_LEVEL = logging.DEBUG
+LOG_LEVEL = logging.INFO
 _PORT = 5050
 
 # Setup ---------------------------
@@ -36,6 +36,13 @@ app_manager.sse_push_callback = _push_sse_event
 
 def _base_jsonify_return(success, message):
     return {'_success': success, '_message': message}
+
+
+@app.after_request
+def no_cache_api(response):
+    if request.path.startswith('/api/'):
+        response.headers['Cache-Control'] = 'no-store'
+    return response
 
 
 # ============================================================================

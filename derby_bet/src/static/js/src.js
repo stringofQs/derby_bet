@@ -1,10 +1,10 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     // Fetch race info once on load (countdown runs in JS from there)
     fetchRaceInfo();
 
-    // Fetch live-updating data immediately, then on a 5-second interval
-    fetchPlayers();
-    fetchOdds();
+    // Await both before opening the SSE connection — prevents the long-lived
+    // SSE stream from racing with these requests on the Werkzeug dev server
+    await Promise.all([fetchPlayers(), fetchOdds()]);
     setInterval(fetchPlayers, 5000);
     setInterval(fetchOdds, 5000);
 
@@ -40,6 +40,7 @@ function clearElement(element) {
 
 async function fetchRaceInfo() {
     try {
+        console.log("fetch race info");
         const response = await fetch('/api/race-info');
         const data = await response.json();
         if (data._success) {
@@ -56,6 +57,7 @@ async function fetchRaceInfo() {
 
 async function fetchPlayers() {
     try {
+        console.log('fetchPlayers()');
         const response = await fetch('/api/players');
         const data = await response.json();
         if (data._success) {
@@ -71,6 +73,7 @@ async function fetchPlayers() {
 
 async function fetchOdds() {
     try {
+        console.log('fetchOdds()');
         const response = await fetch('/api/odds');
         const data = await response.json();
         if (data._success) {
