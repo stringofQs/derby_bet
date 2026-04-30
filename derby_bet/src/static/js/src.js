@@ -262,15 +262,15 @@ function updateRaceSchedulePanel(raceSchedule) {
     });
 }
 
-function gcd(a, b) { while (b) { [a, b] = [b, a % b]; } return a; }
-
 function toTraditionalOdds(amount, total) {
     if (amount <= 0 || total <= 0 || amount >= total) return '—';
     const profit = total - amount;
-    const g = gcd(profit, amount);
-    const n = profit / g;
-    const d = amount / g;
-    return d === 1 ? `${n} to 1` : `${n} to ${d}`;
+    const ratio = profit / amount;
+    if (ratio >= 1) {
+        return `${Math.round(ratio)} to 1`;
+    } else {
+        return `1 to ${Math.round(1 / ratio)}`;
+    }
 }
 
 function updateCurrentRacePoolPanel(poolData) {
