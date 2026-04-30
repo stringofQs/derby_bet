@@ -65,6 +65,9 @@ def _parse_post_bid(post_raw, bid_raw, field_name):
     except ValueError:
         return None, 0, 'Invalid {} post value: "{}"'.format(field_name, post_raw)
 
+    if not (1 <= post <= 20):
+        return None, 0, 'Invalid {} post value (must be 1–20): "{}"'.format(field_name, post_raw)
+
     try:
         bid = int(bid_clean)
     except ValueError:
