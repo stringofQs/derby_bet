@@ -47,7 +47,7 @@ def _parse_post_bid(post_raw, bid_raw, field_name):
     Both valid  -> (int, int, None)
     """
     def _clean(v):
-        return str(v).strip().replace(' ', '').replace('\t', '').replace('-', '').replace('_', '')
+        return str(v).strip().replace(' ', '').replace('\t', '').replace('_', '')
 
     post_clean = _clean(post_raw)
     bid_clean = _clean(bid_raw)
@@ -75,7 +75,7 @@ def _parse_post_bid(post_raw, bid_raw, field_name):
 
 def _safe_int(value, default=0):
     try:
-        value = str(value).strip().replace(' ', '').replace('\t', '').replace('-', '').replace('_', '')
+        value = str(value).strip().replace(' ', '').replace('\t', '').replace('_', '')
         return int(value)
     except (ValueError, TypeError):
         return default
@@ -83,7 +83,7 @@ def _safe_int(value, default=0):
 
 def _safe_float(value, default=0.0):
     try:
-        value = str(value).strip().replace(' ', '').replace('\t', '').replace('-', '').replace('_', '')
+        value = str(value).strip().replace(' ', '').replace('\t', '').replace('_', '')
         return float(value)
     except (ValueError, TypeError):
         return default
