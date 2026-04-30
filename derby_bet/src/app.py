@@ -38,6 +38,13 @@ def _base_jsonify_return(success, message):
     return {'_success': success, '_message': message}
 
 
+@app.after_request
+def no_cache_api(response):
+    if request.path.startswith('/api/'):
+        response.headers['Cache-Control'] = 'no-store'
+    return response
+
+
 # ============================================================================
 # PAGE ROUTE
 # ============================================================================
