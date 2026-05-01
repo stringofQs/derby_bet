@@ -8,16 +8,18 @@ from derby_bet.src.utils.io_tools import find_project_root
 
 _BASE_DIR = find_project_root()
 _STATE_FILE = Path(_BASE_DIR, 'drb', 'wagers', 'wager_row_state.json')
+_TIMELINE_FILE = Path(_BASE_DIR, 'drb', 'wagers', 'wager_timeline_processed.json')
+_UNPROCESSED_TIMELINE_FILE = Path(_BASE_DIR, 'drb', 'wagers', 'wager_timeline_unprocessed.json')
 
 
 class WagerState:
 
     def __init__(self):
         logging.info('Initialized WagerState')
-        self.all_wagers_unprocessed = []
-        self.all_wagers_processed = []
         self.lock = threading.Lock()
         self.last_processed_row = self._load_last_row()
+        self.all_wagers_processed = self._load_processed_wagers()
+        self.all_wagers_unprocessed = self._load_unprocessed_wagers()
 
     def _load_last_row(self):
         if Path(_STATE_FILE).exists():
@@ -27,6 +29,43 @@ class WagerState:
             except Exception:
                 logging.warning('Could not load wager row state; defaulting to 0')
         return 0
+
+    def _load_processed_wagers(self):
+        wagers = []
+        if not _TIMELINE_FILE.exists():
+            return wagers
+        try:
+            with open(str(_TIMELINE_FILE), 'r') as f:
+                for i, line in enumerate(f):
+                    line = line.strip()
+                    if not line:
+                        continue
+                    entry = json.loads(line)
+                    for wager in entry.get('wager', []):
+                        wager.setdefault('wager_id', i + 1)
+                        wagers.append(wager)
+            # Re-assign wager_ids sequentially in case of gaps
+            for i, wager in enumerate(wagers):
+                wager['wager_id'] = i + 1
+        except Exception as e:
+            logging.error(f'Failed to load processed wagers from file: {e}')
+        return wagers
+
+    def _load_unprocessed_wagers(self):
+        wagers = []
+        if not _UNPROCESSED_TIMELINE_FILE.exists():
+            return wagers
+        try:
+            with open(str(_UNPROCESSED_TIMELINE_FILE), 'r') as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    entry = json.loads(line)
+                    wagers.extend(entry.get('wager', []))
+        except Exception as e:
+            logging.error(f'Failed to load unprocessed wagers from file: {e}')
+        return wagers
 
     def _save_last_row(self):
         try:
