@@ -60,8 +60,8 @@ class PayoutCalculator:
                 'bet_type': str(bet_type),
                 'post': int(post),
                 'bids_wagered': float(bids_wagered),
-                'bids_paid': float(bids_paid),
-                'bid_profit': float(bids_paid) - float(bids_wagered)
+                'bids_paid': float(int(bids_paid)),
+                'bid_profit': float(int(bids_paid)) - float(bids_wagered)
             }
         
         logging.debug('New payout received')
@@ -147,9 +147,13 @@ class PayoutCalculator:
         first_payout_id = self.next_transaction_id
 
         for wager in wagers:
+            if not wager.get('valid', False):
+                continue
             pid = wager.get('player_id', 0)
             wager_post = wager.get('{}_post'.format(bet_type), 0)
             wager_amount = float(wager.get('{}_bid'.format(bet_type), 0))
+            if not wager_post or wager_amount == 0:  # Wager didn't bet on this pool type
+                continue
             if int(wager_post) not in posts_int:  # Specific wager is a losing post
                 self.add_new_payout(
                     race_num, pid, bet_type, wager_post, wager_amount, 0

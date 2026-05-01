@@ -232,14 +232,13 @@ class AppManager:
                 logging.error('Non-unique post values received: {}'.format(win_post, place_post, show_post))
                 raise ValueError('Expected win, place, and show posts to be unique. Received {}, {}, {}'.format(win_post, place_post, show_post))
             
-            self.race_manager.set_results(race_num, win_post, place_post, show_post)
-            
             result_map = {
                 'win': [win_post],
                 'place': [place_post, win_post],
                 'show': [show_post, place_post, win_post]
             }
 
+            all_payouts = []
             for bet_type, posts in result_map.items():
                 pool_dict = self.pool_manager.get_pool_info(race_num, spec_pool=bet_type)
                 pool_total = self.pool_manager.total_in_bet_type(race_num, bet_type)
@@ -247,14 +246,17 @@ class AppManager:
 
                 first_payout, last_payout = self.payout_calculator.calculate_payouts(race_num, bet_type, posts, pool_dict, wagers, pool_total)
                 race_payouts = self.payout_calculator.get_payouts_between_ids(first_payout, last_payout)
+                all_payouts.extend(race_payouts)
 
-                for transaction in race_payouts:
-                    profit = float(transaction.get('bid_profit', 0.))
-                    player_id = transaction.get('player_id', 0)
-                    if (profit <= 0):
-                        self.player_manager.set_losing_bid(abs(profit), player_id=player_id)
-                    else:
-                        self.player_manager.set_winning_bid(abs(profit), transaction.get('bid_wagered', 0), player_id=player_id)
+            self.race_manager.set_results(race_num, win_post, place_post, show_post)
+
+            for transaction in all_payouts:
+                profit = float(transaction.get('bid_profit', 0.))
+                player_id = transaction.get('player_id', 0)
+                if (profit <= 0):
+                    self.player_manager.set_losing_bid(abs(profit), player_id=player_id)
+                else:
+                    self.player_manager.set_winning_bid(abs(profit), transaction.get('bids_wagered', 0), player_id=player_id)
     
     def invalidate_wager(self, wager_id):
         wager = self.wager_state.get_wager_by_id(wager_id)
