@@ -40,9 +40,28 @@ class WagerState:
         logging.debug(f'Updating wagers to new total {total_rows}')
         with self.lock:
             self.all_wagers_unprocessed.extend(new_unp_wagers)
+            starting_row = self.last_processed_row
+            for i, wager in enumerate(new_proc_wagers):
+                wager['wager_id'] = starting_row + i + 1
             self.all_wagers_processed.extend(new_proc_wagers)
             self.last_processed_row = total_rows
         self._save_last_row()
+
+    def get_wager_by_id(self, wager_id):
+        with self.lock:
+            for wager in self.all_wagers_processed:
+                if wager.get('wager_id') == int(wager_id):
+                    return wager.copy()
+        return None
+
+    def mark_wager_invalidated(self, wager_id):
+        with self.lock:
+            for wager in self.all_wagers_processed:
+                if wager.get('wager_id') == int(wager_id):
+                    wager['valid'] = False
+                    wager['invalidated'] = True
+                    return True
+        return False
     
     def get_all(self, processed=False):
         with self.lock:

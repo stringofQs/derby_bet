@@ -201,6 +201,26 @@ def admin_finalize_race():
         return jsonify(_base_jsonify_return(False, 'Internal server error')), 500
 
 
+@app.route('/api/admin/invalidate-wager', methods=['POST'])
+def admin_invalidate_wager():
+    data = request.get_json()
+    if not data:
+        return jsonify(_base_jsonify_return(False, 'No JSON body received')), 400
+
+    wager_id = data.get('wager_id')
+    if wager_id is None:
+        return jsonify(_base_jsonify_return(False, 'Missing wager_id')), 400
+
+    try:
+        app_manager.invalidate_wager(wager_id)
+        return jsonify(_base_jsonify_return(True, f'Wager {wager_id} successfully invalidated'))
+    except ValueError as e:
+        return jsonify(_base_jsonify_return(False, str(e))), 400
+    except Exception:
+        logging.error('Error invalidating wager', exc_info=True)
+        return jsonify(_base_jsonify_return(False, 'Internal server error')), 500
+
+
 @app.route('/api/admin/add-player', methods=['POST'])
 def admin_add_player():
     data = request.get_json()

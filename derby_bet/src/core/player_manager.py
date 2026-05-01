@@ -352,6 +352,12 @@ class PlayerManager:
         self.change_bids_pending(amount, player_name=player_name, player_id=player_id)
         self.change_bids_placed(amount, player_name=player_name, player_id=player_id)
 
+    def unplace_bids(self, amount, player_name=None, player_id=None):
+        logging.info(f'Unplace {amount} bids for player {player_name} | {player_id}')
+        self.change_bids_available(amount, player_name=player_name, player_id=player_id)
+        self.change_bids_pending(-amount, player_name=player_name, player_id=player_id)
+        self.change_bids_placed(-amount, player_name=player_name, player_id=player_id)
+
     def set_winning_bid(self, amount_won, associated_pending, player_name=None, player_id=None):
         # When a bid is won, the total amount of bids won will be applied to both the "won" and "available" categories
         # Additionally, the amount in the associated pending will be removed (this amount is all bid amount on this current race)

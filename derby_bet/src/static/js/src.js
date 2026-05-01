@@ -5,8 +5,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Await both before opening the SSE connection — prevents the long-lived
     // SSE stream from racing with these requests on the Werkzeug dev server
     await Promise.all([fetchPlayers(), fetchOdds()]);
-    setInterval(fetchPlayers, 5000);
-    setInterval(fetchOdds, 5000);
+    setInterval(fetchPlayers, 2500);
+    setInterval(fetchOdds, 2500);
 
     // SSE for race finalization events pushed from the backend
     setupEventSource();
@@ -262,15 +262,15 @@ function updateRaceSchedulePanel(raceSchedule) {
     });
 }
 
-function gcd(a, b) { while (b) { [a, b] = [b, a % b]; } return a; }
-
 function toTraditionalOdds(amount, total) {
     if (amount <= 0 || total <= 0 || amount >= total) return '—';
     const profit = total - amount;
-    const g = gcd(profit, amount);
-    const n = profit / g;
-    const d = amount / g;
-    return d === 1 ? `${n} to 1` : `${n} to ${d}`;
+    const ratio = profit / amount;
+    if (ratio >= 1) {
+        return `${Math.round(ratio)} to 1`;
+    } else {
+        return `1 to ${Math.round(1 / ratio)}`;
+    }
 }
 
 function updateCurrentRacePoolPanel(poolData) {
@@ -512,5 +512,39 @@ document.getElementById('add-new-player').addEventListener('click', () => {
         feedbackEl.className = 'admin-feedback error';
         feedbackEl.textContent = 'Request failed.';
         console.error('Error adding new player:', err);
+    });
+});
+
+document.getElementById('invalidate-wager').addEventListener('click', () => {
+    const feedbackEl = document.getElementById('invalidate-wager-feedback');
+    feedbackEl.className = 'admin-feedback';
+    feedbackEl.textContent = '';
+
+    const wagerIdRaw = document.getElementById('invalidate-wager-id').value;
+    const wagerId = parseInt(wagerIdRaw, 10);
+
+    if (!wagerIdRaw || isNaN(wagerId) || wagerId < 1) {
+        feedbackEl.className = 'admin-feedback error';
+        feedbackEl.textContent = 'Please enter a valid wager ID.';
+        return;
+    }
+
+    fetch('/api/admin/invalidate-wager', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ wager_id: wagerId })
+    })
+    .then(r => r.json())
+    .then(data => {
+        feedbackEl.className = data._success ? 'admin-feedback success' : 'admin-feedback error';
+        feedbackEl.textContent = data._message;
+        if (data._success) {
+            document.getElementById('invalidate-wager-id').value = '';
+        }
+    })
+    .catch(err => {
+        feedbackEl.className = 'admin-feedback error';
+        feedbackEl.textContent = 'Request failed.';
+        console.error('Error invalidating wager:', err);
     });
 });
