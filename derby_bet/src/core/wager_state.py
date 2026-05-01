@@ -18,7 +18,6 @@ class WagerState:
         self.all_wagers_processed = []
         self.lock = threading.Lock()
         self.last_processed_row = self._load_last_row()
-        self._next_wager_id = 1
 
     def _load_last_row(self):
         if Path(_STATE_FILE).exists():
@@ -41,9 +40,9 @@ class WagerState:
         logging.debug(f'Updating wagers to new total {total_rows}')
         with self.lock:
             self.all_wagers_unprocessed.extend(new_unp_wagers)
-            for wager in new_proc_wagers:
-                wager['wager_id'] = self._next_wager_id
-                self._next_wager_id += 1
+            starting_row = self.last_processed_row
+            for i, wager in enumerate(new_proc_wagers):
+                wager['wager_id'] = starting_row + i + 1
             self.all_wagers_processed.extend(new_proc_wagers)
             self.last_processed_row = total_rows
         self._save_last_row()
