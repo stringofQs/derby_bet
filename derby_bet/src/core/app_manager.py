@@ -253,7 +253,7 @@ class AppManager:
             for transaction in all_payouts:
                 profit = float(transaction.get('bid_profit', 0.))
                 player_id = transaction.get('player_id', 0)
-                if (profit <= 0):
+                if (profit < 0):
                     self.player_manager.set_losing_bid(abs(profit), player_id=player_id)
                 else:
                     self.player_manager.set_winning_bid(abs(profit), transaction.get('bids_wagered', 0), player_id=player_id)

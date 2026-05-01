@@ -49,7 +49,7 @@ class PayoutCalculator:
     
     def add_new_payout(self, race_num, player_id, bet_type, post, bids_wagered, bids_paid):
         if (str(self.next_transaction_id) in self.payouts.keys()):
-            self.next_transaction_id = max([int(i) for i in self.payouts.keys()])
+            self.next_transaction_id = max([int(i) for i in self.payouts.keys()]) + 1
         
         with self.lock:
             self.payouts[str(int(self.next_transaction_id))] = {
@@ -86,7 +86,7 @@ class PayoutCalculator:
         assert ((not isinstance(payout_id, type(None))) or (not isinstance(race_num, type(None))) or (not isinstance(player_id, type(None))) or (not isinstance(bet_type, type(None))) or (not isinstance(post, type(None)))), 'Expected payout parser to contain at least one input to find'
 
         data = self._data_to_df()
-        filt = pd.Series([False] * len(data))
+        filt = pd.Series([True] * len(data))
 
         if not isinstance(payout_id, type(None)):
             filt &= (data['payout_id'] == int(payout_id))
