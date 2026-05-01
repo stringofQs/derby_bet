@@ -514,3 +514,37 @@ document.getElementById('add-new-player').addEventListener('click', () => {
         console.error('Error adding new player:', err);
     });
 });
+
+document.getElementById('invalidate-wager').addEventListener('click', () => {
+    const feedbackEl = document.getElementById('invalidate-wager-feedback');
+    feedbackEl.className = 'admin-feedback';
+    feedbackEl.textContent = '';
+
+    const wagerIdRaw = document.getElementById('invalidate-wager-id').value;
+    const wagerId = parseInt(wagerIdRaw, 10);
+
+    if (!wagerIdRaw || isNaN(wagerId) || wagerId < 1) {
+        feedbackEl.className = 'admin-feedback error';
+        feedbackEl.textContent = 'Please enter a valid wager ID.';
+        return;
+    }
+
+    fetch('/api/admin/invalidate-wager', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ wager_id: wagerId })
+    })
+    .then(r => r.json())
+    .then(data => {
+        feedbackEl.className = data._success ? 'admin-feedback success' : 'admin-feedback error';
+        feedbackEl.textContent = data._message;
+        if (data._success) {
+            document.getElementById('invalidate-wager-id').value = '';
+        }
+    })
+    .catch(err => {
+        feedbackEl.className = 'admin-feedback error';
+        feedbackEl.textContent = 'Request failed.';
+        console.error('Error invalidating wager:', err);
+    });
+});

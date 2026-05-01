@@ -256,6 +256,40 @@ class AppManager:
                     else:
                         self.player_manager.set_winning_bid(abs(profit), transaction.get('bid_wagered', 0), player_id=player_id)
     
+    def invalidate_wager(self, wager_id):
+        wager = self.wager_state.get_wager_by_id(wager_id)
+        if not wager:
+            raise ValueError(f'Wager {wager_id} not found')
+        if not wager.get('valid', False):
+            raise ValueError(f'Wager {wager_id} was not valid and cannot be invalidated')
+        if wager.get('invalidated', False):
+            raise ValueError(f'Wager {wager_id} is already invalidated')
+
+        race_num = wager.get('race_number', 0)
+        if self.race_manager.is_race_complete(race_num):
+            raise ValueError(f'Race {race_num} is already complete; wager cannot be invalidated')
+
+        win_post = wager.get('win_post', '')
+        win_bid = wager.get('win_bid', 0)
+        place_post = wager.get('place_post', '')
+        place_bid = wager.get('place_bid', 0)
+        show_post = wager.get('show_post', '')
+        show_bid = wager.get('show_bid', 0)
+        player_id = wager.get('player_id', 0)
+        total = sum(int(b) for b in [win_bid, place_bid, show_bid] if len(str(b)) > 0)
+
+        with self.global_lock:
+            if len(str(win_post)) > 0:
+                self.pool_manager.apply_to_win_pool(race_num, win_post, -int(win_bid))
+            if len(str(place_post)) > 0:
+                self.pool_manager.apply_to_place_pool(race_num, place_post, -int(place_bid))
+            if len(str(show_post)) > 0:
+                self.pool_manager.apply_to_show_pool(race_num, show_post, -int(show_bid))
+            self.player_manager.unplace_bids(total, player_id=str(player_id))
+
+        self.wager_state.mark_wager_invalidated(wager_id)
+        logging.info(f'Wager {wager_id} invalidated successfully')
+
     def get_current_race_odds(self):
         cur_race = self.race_manager.get_next_race()
         if not cur_race:
