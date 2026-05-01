@@ -363,7 +363,7 @@ class PlayerManager:
         # Additionally, the amount in the associated pending will be removed (this amount is all bid amount on this current race)
         logging.info(f'Win {amount_won} bids for player {player_name} | {player_id}')
         self.change_bids_won(amount_won, player_name=player_name, player_id=player_id)
-        self.change_bids_available(amount_won, player_name=player_name, player_id=player_id)
+        self.change_bids_available(amount_won + associated_pending, player_name=player_name, player_id=player_id)
         self.change_bids_pending(-associated_pending, player_name=player_name, player_id=player_id)
 
     def set_losing_bid(self, amount_lost, player_name=None, player_id=None):
@@ -374,4 +374,4 @@ class PlayerManager:
     def validate_bids(self, player_name=None, player_id=None):
         logging.debug(f'Validating bid values for player {player_name} | {player_id}')
         bid_data = self.get_bids_data(player_name=player_name, player_id=player_id)
-        return bid_data.get('available', 0) == (bid_data.get('purchased', 0) + bid_data.get('won', 0) - bid_data.get('placed', 0))
+        return bid_data.get('available', 0) == (bid_data.get('purchased', 0) + bid_data.get('won', 0) - bid_data.get('lost', 0) - bid_data.get('active_pending', 0))

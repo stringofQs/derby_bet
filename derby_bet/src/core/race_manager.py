@@ -87,9 +87,9 @@ class RaceManager:
         logging.info(f'Setting race results for race {race_num} to win={win}, place={place}, show={show}')
         ind_race = self.get_race_info(race_num)
         
-        ind_race['win'] = win
-        ind_race['place'] = place
-        ind_race['show'] = show
+        ind_race['win'] = int(win)
+        ind_race['place'] = int(place)
+        ind_race['show'] = int(show)
         ind_race['status'] = 'complete'
         with self.lock:
             self.races[str(int(race_num))] = ind_race

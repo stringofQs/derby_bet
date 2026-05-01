@@ -49,7 +49,7 @@ class PayoutCalculator:
     
     def add_new_payout(self, race_num, player_id, bet_type, post, bids_wagered, bids_paid):
         if (str(self.next_transaction_id) in self.payouts.keys()):
-            self.next_transaction_id = max([int(i) for i in self.payouts.keys()])
+            self.next_transaction_id = max([int(i) for i in self.payouts.keys()]) + 1
         
         with self.lock:
             self.payouts[str(int(self.next_transaction_id))] = {
@@ -60,8 +60,8 @@ class PayoutCalculator:
                 'bet_type': str(bet_type),
                 'post': int(post),
                 'bids_wagered': float(bids_wagered),
-                'bids_paid': float(bids_paid),
-                'bid_profit': float(bids_paid) - float(bids_wagered)
+                'bids_paid': float(int(bids_paid)),
+                'bid_profit': float(int(bids_paid)) - float(bids_wagered)
             }
         
         logging.debug('New payout received')
@@ -86,7 +86,7 @@ class PayoutCalculator:
         assert ((not isinstance(payout_id, type(None))) or (not isinstance(race_num, type(None))) or (not isinstance(player_id, type(None))) or (not isinstance(bet_type, type(None))) or (not isinstance(post, type(None)))), 'Expected payout parser to contain at least one input to find'
 
         data = self._data_to_df()
-        filt = pd.Series([False] * len(data))
+        filt = pd.Series([True] * len(data))
 
         if not isinstance(payout_id, type(None)):
             filt &= (data['payout_id'] == int(payout_id))
@@ -147,9 +147,13 @@ class PayoutCalculator:
         first_payout_id = self.next_transaction_id
 
         for wager in wagers:
+            if not wager.get('valid', False):
+                continue
             pid = wager.get('player_id', 0)
             wager_post = wager.get('{}_post'.format(bet_type), 0)
             wager_amount = float(wager.get('{}_bid'.format(bet_type), 0))
+            if not wager_post or wager_amount == 0:  # Wager didn't bet on this pool type
+                continue
             if int(wager_post) not in posts_int:  # Specific wager is a losing post
                 self.add_new_payout(
                     race_num, pid, bet_type, wager_post, wager_amount, 0
