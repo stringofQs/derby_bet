@@ -72,7 +72,19 @@ class AppManager:
                 race_number = int(norm_wager_data.get('race_number', 0))
                 if not self.race_manager.is_valid_race(race_number):
                     errors.append('Invalid race number: {}'.format(race_number))
-                
+                else:
+                    race_info = self.race_manager.get_race_info(race_number)
+                    post_time_str = race_info.get('post_time', '')
+                    raw_ts = norm_wager_data.get('timestamp_google', '')
+                    if post_time_str and raw_ts:
+                        try:
+                            wager_ts = dt.datetime.strptime(str(raw_ts).strip(), '%m/%d/%Y %H:%M:%S')
+                            post_time = dt.datetime.fromisoformat(post_time_str)
+                            if wager_ts > post_time:
+                                errors.append('Wager received after post time ({}) for race {}.'.format(post_time_str, race_number))
+                        except (ValueError, TypeError) as e:
+                            logging.warning('Could not parse timestamps for post-time check on race {}: {}'.format(race_number, e))
+
                 win_post, win_bid, win_err = _parse_post_bid(
                     norm_wager_data.get('win_post', ''), norm_wager_data.get('win_bid', ''), 'win'
                 )
