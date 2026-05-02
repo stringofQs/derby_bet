@@ -375,7 +375,7 @@ def output_state_trs(state_data, processed=False):
     df.to_csv(str(Path(trsc_dir, f'transactions_{proc}.csv')), index=False)
 
 
-def poll_wagers(update_time=5):
+def poll_wagers(update_time=2):
     while True:
         try:
             all_responses = gapi.get_form_responses(gapi.WAGER_RANGE_NAME)
@@ -422,7 +422,7 @@ def poll_wagers(update_time=5):
         sleep(update_time)
 
 
-def poll_transactions(update_time=10):
+def poll_transactions(update_time=5):
     while True:
         try:
             all_responses = gapi.get_form_responses(gapi.TRANSACTION_RANGE_NAME)

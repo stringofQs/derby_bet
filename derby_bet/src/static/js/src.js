@@ -5,8 +5,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Await both before opening the SSE connection — prevents the long-lived
     // SSE stream from racing with these requests on the Werkzeug dev server
     await Promise.all([fetchPlayers(), fetchOdds()]);
-    setInterval(fetchPlayers, 2500);
-    setInterval(fetchOdds, 2500);
+    setInterval(fetchPlayers, 1000);
+    setInterval(fetchOdds, 1000);
 
     // SSE for race finalization events pushed from the backend
     setupEventSource();
