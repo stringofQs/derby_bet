@@ -65,7 +65,7 @@ class PlayerManager:
         
         for k, v in data.items():
             player_name = v.get('player_name')
-            self._map_name_id_dict[str(player_name).lower().replace(' ', '')] = str(int(k))
+            self._map_name_id_dict[str(player_name).lower().replace(' ', '').replace('-', '')] = str(int(k))
             
         return data
     
@@ -90,8 +90,8 @@ class PlayerManager:
             assert (not isinstance(player_name, type(None))) or (not isinstance(player_id, type(None))), 'Expected to receive either player ID or player name for info lookup, received neither.'
 
             if isinstance(player_id, type(None)):
-                assert str(player_name).lower().replace(' ', '') in self._map_name_id_dict.keys(), 'Player name received does not exist in the current player data. Received {}'.format(player_name)
-                player_id = self._map_name_id_dict.get(str(player_name).lower().replace(' ', ''))
+                assert str(player_name).lower().replace(' ', '').replace('-', '') in self._map_name_id_dict.keys(), 'Player name received does not exist in the current player data. Received {}'.format(player_name)
+                player_id = self._map_name_id_dict.get(str(player_name).lower().replace(' ', '').replace('-', ''))
             return player_id
         except:
             logging.error('Invalid player ID entry.')
@@ -148,7 +148,7 @@ class PlayerManager:
         return True
 
     def add_new_player(self, player_name):
-        if player_name.lower().replace(' ', '') in self._map_name_id_dict.keys():
+        if player_name.lower().replace(' ', '').replace('-', '') in self._map_name_id_dict.keys():
             logging.warning('Provided player ({}) already exists. Not adding as a new player.'.format(player_name))
         else:
             new_id = self.total_players + 1
@@ -169,7 +169,7 @@ class PlayerManager:
             
             logging.info('New player added: {} | {}'.format(player_name, new_id))
             self._timestamp_player_change(int(new_id))
-            self._map_name_id_dict[player_name.lower().replace(' ', '')] = str(int(new_id))
+            self._map_name_id_dict[player_name.lower().replace(' ', '').replace('-', '')] = str(int(new_id))
             self._update_player_count()
 
             self._save_players()

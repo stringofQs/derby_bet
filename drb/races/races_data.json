@@ -6,7 +6,7 @@
     "win": null,
     "place": null,
     "show": null,
-    "status": "next"
+    "status": "complete"
   },
   "2": {
     "race_id": 2,
@@ -15,34 +15,34 @@
     "win": null,
     "place": null,
     "show": null,
-    "status": "pending"
+    "status": "complete"
   },
   "3": {
     "race_id": 3,
-    "race_description": "Race 3",
+    "race_description": "Allowance Race",
     "post_time": "2026-05-02T12:05:00",
     "win": null,
     "place": null,
     "show": null,
-    "status": "pending"
+    "status": "complete"
   },
   "4": {
     "race_id": 4,
-    "race_description": "Race 4",
+    "race_description": "Derby City Distaff",
     "post_time": "2026-05-02T12:38:00",
-    "win": null,
-    "place": null,
-    "show": null,
-    "status": "pending"
+    "win": 6,
+    "place": 4,
+    "show": 1,
+    "status": "complete"
   },
   "5": {
     "race_id": 5,
-    "race_description": "Race 5",
+    "race_description": "Twin Spires Turf Sprint",
     "post_time": "2026-05-02T13:12:00",
-    "win": null,
-    "place": null,
-    "show": null,
-    "status": "pending"
+    "win": 1,
+    "place": 2,
+    "show": 3,
+    "status": "complete"
   },
   "6": {
     "race_id": 6,
@@ -51,11 +51,11 @@
     "win": null,
     "place": null,
     "show": null,
-    "status": "pending"
+    "status": "next"
   },
   "7": {
     "race_id": 7,
-    "race_description": "Race 7",
+    "race_description": "Longines Churchill Distaff Turf Mile",
     "post_time": "2026-05-02T14:38:00",
     "win": null,
     "place": null,
@@ -64,7 +64,7 @@
   },
   "8": {
     "race_id": 8,
-    "race_description": "Race 8",
+    "race_description": "Pat Day Mile",
     "post_time": "2026-05-02T15:23:00",
     "win": null,
     "place": null,
@@ -73,7 +73,7 @@
   },
   "9": {
     "race_id": 9,
-    "race_description": "Race 9",
+    "race_description": "American Turf",
     "post_time": "2026-05-02T16:06:00",
     "win": null,
     "place": null,
@@ -82,7 +82,7 @@
   },
   "10": {
     "race_id": 10,
-    "race_description": "Race 10",
+    "race_description": "Churchill Downs",
     "post_time": "2026-05-02T16:50:00",
     "win": null,
     "place": null,
